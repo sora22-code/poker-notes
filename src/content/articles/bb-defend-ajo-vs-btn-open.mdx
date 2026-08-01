@@ -1,0 +1,157 @@
+---
+title: "BTN 2.5BBオープンにBBでAJoをどう守るか"
+description: "6-maxキャッシュゲーム、100bbエフェクティブ。BTNの2.5bbオープンに対してBBのAJoで実際にコールし、フロップでトップペアを引いてから river まで進んだハンドを、ポットオッズとレンジの観点から振り返る。"
+emoji: "🛡️"
+category: "review"
+tags: ["プリフロップ", "BB防衛", "ハンドレンジ", "6-max"]
+publishedAt: 2026-08-01
+draft: false
+---
+
+import PokerTable from '../../components/poker/PokerTable';
+import HandRangeChart from '../../components/poker/HandRangeChart';
+import EquityCalculator from '../../components/poker/EquityCalculator';
+import ActionLine from '../../components/poker/ActionLine';
+import Message from '../../components/article/Message.astro';
+import Accordion from '../../components/article/Accordion.astro';
+
+先日の6-maxキャッシュゲーム(NL50, 100bbエフェクティブ)で、BTNの2.5bbオープンに対してBBのA♣J♦(AJo)をコールし、フロップでトップペアトップキッカーを引いてからリバーまで進めたハンドがありました。結果自体は勝ちハンドでしたが、「そもそもAJoはコールが正しいのか」「フロップ以降の打ち方は最適だったか」を、コールした瞬間の感覚だけでなく数字で言語化しておきたいので記事にまとめます。
+
+## 状況設定
+
+- フォーマット: 6-max キャッシュゲーム (NL50)
+- スタック: 全員100bbエフェクティブ
+- ポジション: Hero は BB、Villain は BTN
+- Villain のイメージ: VPIP 28 / PFR 24 ほどのやや広めのオープンレイズを打ってくるレギュラー
+
+<PokerTable
+  client:visible
+  street="preflop"
+  pot={4}
+  players={[
+    { position: 'UTG', stack: 100, folded: true },
+    { position: 'HJ', stack: 100, folded: true },
+    { position: 'CO', stack: 100, folded: true },
+    { position: 'BTN', stack: 97.5, bet: 2.5, isActive: true },
+    { position: 'SB', stack: 99.5, folded: true },
+    { position: 'BB', stack: 98, bet: 1, isHero: true, cards: ['Ac', 'Jd'] },
+  ]}
+  caption="UTG〜CO フォールド、BTN が 2.5bb オープン。Hero(BB) が AJo を持って着手権を握る。"
+/>
+
+## プリフロップ: AJoはコールかフォールドか
+
+<ActionLine
+  street="Preflop"
+  actions={[
+    { position: 'UTG', action: 'fold' },
+    { position: 'HJ', action: 'fold' },
+    { position: 'CO', action: 'fold' },
+    { position: 'BTN', action: 'raise', amount: 2.5 },
+    { position: 'SB', action: 'fold' },
+  ]}
+/>
+
+BBは既に1bbを投資済みなので、2.5bbのオープンに対してコールに必要な追加投資はわずか1.5bbです。ポットは(2.5 + 1.5 + 1.5(SB分は既にフォールド分含む) ≈ )ざっくり4bb前後まで膨らみ、**「1.5bb払って4bb強のポットを取りに行く」**という非常に良いポットオッズが得られます。この価格の良さが、BBディフェンスレンジがどのポジションよりも広くなる根本的な理由です。
+
+<Message type="info">
+BBはSB以外の唯一「既に1bb投資済み」のポジションなので、同じハンドでもUTGやCOでオープンする場合よりずっと広くコールが正当化されます。AJoのようなブロードウェイのオフスートは、単体の強さだけでなく「価格」で評価する必要があります。
+</Message>
+
+実際にBTNの2.5bbオープンレンジと、それに対するBB防衛(コール)レンジを並べてみると、AJoはコールレンジの中でもかなり中心寄りの強さであることがわかります。
+
+<HandRangeChart
+  client:visible
+  title="BTN 2.5bb オープンレンジ vs BB 防衛(コール)レンジ"
+  ranges={[
+    {
+      label: 'BTN オープンレンジ (約48%)',
+      color: 'var(--color-poker-raise)',
+      hands: '22+, A2s+, K2s+, Q4s+, J6s+, T7s+, 96s+, 86s+, 75s+, 65s, 54s, ATo+, KTo+, QTo+, JTo',
+    },
+    {
+      label: 'BB 防衛レンジ / コール (約35%)',
+      color: 'var(--color-poker-bet)',
+      hands: '22-TT, A2s-AQs, K6s+, Q8s+, J8s+, T8s+, 97s+, 87s, 76s, 65s, 54s, ATo-AQo, KJo+, QJo',
+    },
+  ]}
+  highlight={['AJo']}
+/>
+
+グリッド中で枠線が付いているセルが今回のAJoです。BTNのオープンレンジの中でも上位に位置し、BB防衛レンジの中では「余裕を持ってコールできる」帯にあることが視覚的に確認できます。3ベットではなくフラットコールを選んだ理由は、AJoはブラフキャッチとして相手のAK/AQ/AJのような近いレンジに対してドミネートされるリスクがある一方、KK+やAKのようなナッツ級のハンドに対しては3ベットしてもフォールドを取れないため、**ポジション不利を承知の上でポットを大きくしすぎない**判断です。
+
+実際にAJoがBTNのオープンレンジ全体に対してどの程度のエクイティを持つのかも計算してみます。
+
+<EquityCalculator
+  client:load
+  readonly={true}
+  iterations={20000}
+  hands={[
+    'AcJd',
+    '22+, A2s+, K2s+, Q4s+, J6s+, T7s+, 96s+, 86s+, 75s+, 65s, 54s, ATo+, KTo+, QTo+, JTo',
+  ]}
+/>
+
+レンジ全体に対しては互角に近いエクイティが出ます。実際のプレイではレンジの上澄み(3ベットで降りるようなプレミアムハンド)がある分だけAJo側が多少不利に振れますが、それでもフォールドするほどのビハインドにはならず、ポットオッズも加味すればコールが妥当という結論です。
+
+## フロップ
+
+<ActionLine street="Flop" actions={[{ position: 'BB', action: 'check' }, { position: 'BTN', action: 'bet', amount: 2 }]} />
+
+フロップは A♥ 7♣ 3♦。Heroはトップペアトップキッカーを完成させました。BTNはこのボードに対して33%ポット程度の小さいCベットを打ってきます。
+
+<PokerTable
+  client:visible
+  street="flop"
+  pot={9}
+  board={['Ah', '7c', '3d']}
+  players={[
+    { position: 'BTN', stack: 95.5, bet: 2, isActive: true },
+    { position: 'BB', stack: 96, isHero: true, cards: ['Ac', 'Jd'] },
+  ]}
+  caption="A-7-3 レインボー。Hero はトップペアトップキッカー、Villain は小さいサイズでCベット。"
+/>
+
+Aハイボードはレンジ的にはBTNよりもBBに有利(BBのコールレンジにAxのブロードウェイが厚く残っているため)なボードです。小さいCベットに対しては、レンジ・ハンド強度の両面からチェックレイズよりも**コールで様子を見る**選択をしました。ここでチェックレイズすると、相手のフォールドレンジ(AK/AQなどまだ強いハンドは残る)を刈り取れず、逆に自分のレンジの中でも上位に位置するAJoで浅いプールを作ってしまうためです。
+
+<Accordion title="チェックレイズも選択肢になり得るケース">
+もしBTNのCベット頻度・サイズが「小さく広く撒く」タイプではなく「強いハンドに絞って大きめに打つ」タイプであれば、AJoのようなトップペア良キッカーは待たずにレイズしてバリューを引き出しにいく選択も十分あります。この判断は自分のレンジの強さだけでなく、相手のベットサイズ戦略に依存します。
+</Accordion>
+
+## ターン
+
+<ActionLine street="Turn" actions={[{ position: 'BB', action: 'check' }, { position: 'BTN', action: 'bet', amount: 6 }]} />
+
+ターンは 9♠ (関連の薄いブランク)。BTNはポットの2/3ほどまでサイズを上げてバレルしてきました。
+
+Heroはここでレイズを考えましたが、AJoはこのレンジ・ボードで「勝っているときはリードするハンド(セット、Axの上位、2ペアなど)に負けている可能性があるハンドに対してレイズしてもフォールドさせづらく、コールされたときに勝率が悪化する」典型的なブラフキャッチ帯にいます。ポットオッズ(6bb払って17bbを取りにいく)を確認した上でコールに留めました。
+
+<EquityCalculator
+  client:load
+  readonly={true}
+  iterations={20000}
+  hands={['AcJd', 'QQ+, AKs, AKo, A7s, 77']}
+  board={['Ah', '7c', '3d', '9s']}
+/>
+
+Villainのターンでのバリューバレル想定レンジ(オーバーペア、AK、Ax上位のツーペア、セット)に絞って再計算すると、AJoのエクイティは五分を割り込みます。逆に言えば、この価格でコールし続けられるのはポットオッズのおかげであり、「勝っている」という感覚だけで打ち続けるのは危険というのがこのハンドの重要なポイントです。
+
+## リバー
+
+<ActionLine street="River" actions={[{ position: 'BB', action: 'check' }, { position: 'BTN', action: 'check' }]} />
+
+リバーは 2♥。Villainはターンのバレルの後、リバーでチェックしてきました。ショーダウンでHeroのAJoがトップペアで勝利。Villainは A9s のようなセカンドペア〜ミドルペア止まりのハンドで、ターンのバレルはブラフ半分・薄いバリュー半分の意図だったと推測されます。
+
+## 結果と振り返り
+
+- プリフロップのコールはポットオッズとレンジ構成の両面から妥当だった
+- フロップの様子見コールは、Aハイボードでのレンジアドバンテージを活かしつつ相手のミスを誘発する選択として機能した
+- ターンのコールはポットオッズ計算上は正しいが、Villainのバレル頻度に関する読みが甘いと簡単に負け越すラインでもあり、次回以降はVillainの過去のショーダウンハンドを追加でメモしておきたい
+
+<Message type="alert">
+「勝ったから正しかった」と早合点しないこと。今回のターンコールはポットオッズ的には成立していますが、Villainのバレルレンジの想定次第では簡単にマイナスEVになり得るスポットでした。結果ではなくプロセスを評価する習慣を崩さないようにします。
+</Message>
+
+## 学び
+
+BBはポットオッズとAJoの持つドミネート耐性を根拠に広く守り、フロップでトップペアを引いた後はレンジアドバンテージを活かして様子見に回り、ターン以降は「勝っている感覚」ではなくポットオッズと相手のバレルレンジ想定で継続/降りるを判断する。
