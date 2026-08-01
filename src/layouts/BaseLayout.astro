@@ -1,0 +1,88 @@
+---
+import '../styles/global.css';
+import Header from '../components/ui/Header.astro';
+import Footer from '../components/ui/Footer.astro';
+
+interface Props {
+  title: string;
+  description?: string;
+  ogImage?: string;
+}
+
+const {
+  title,
+  description = 'エンジニアのためのポーカー技術ブログ。プリフロップからポストフロップまで、実戦の判断を言語化する。',
+  ogImage = '/og/default.png',
+} = Astro.props;
+
+const pageTitle = title ? `${title} | poker-notes` : 'poker-notes';
+const canonicalURL = new URL(Astro.url.pathname, Astro.site);
+const ogImageURL = new URL(ogImage, Astro.site);
+---
+
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="canonical" href={canonicalURL} />
+    <meta name="generator" content={Astro.generator} />
+
+    <title>{pageTitle}</title>
+    <meta name="description" content={description} />
+
+    <meta property="og:type" content="article" />
+    <meta property="og:site_name" content="poker-notes" />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonicalURL} />
+    <meta property="og:image" content={ogImageURL} />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={pageTitle} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImageURL} />
+
+    <script is:inline>
+      const stored = localStorage.getItem('theme');
+      const theme = stored ?? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+      document.documentElement.setAttribute('data-theme', theme);
+    </script>
+  </head>
+  <body>
+    <Header />
+    <main>
+      <slot />
+    </main>
+    <Footer />
+
+    <script>
+      function initCopyButtons() {
+        const blocks = document.querySelectorAll('pre.astro-code, .code-file-body pre');
+        blocks.forEach((pre) => {
+          if (pre.parentElement?.classList.contains('code-block-wrap')) return;
+          if (pre.closest('.code-file-body')) return;
+
+          const wrap = document.createElement('div');
+          wrap.className = 'code-block-wrap';
+          pre.parentElement?.insertBefore(wrap, pre);
+          wrap.appendChild(pre);
+
+          const button = document.createElement('button');
+          button.type = 'button';
+          button.className = 'copy-code-btn';
+          button.textContent = 'コピー';
+          button.addEventListener('click', async () => {
+            const text = pre.textContent ?? '';
+            await navigator.clipboard.writeText(text);
+            button.textContent = 'コピーしました';
+            setTimeout(() => (button.textContent = 'コピー'), 1500);
+          });
+          wrap.appendChild(button);
+        });
+      }
+      initCopyButtons();
+    </script>
+  </body>
+</html>

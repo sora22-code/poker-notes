@@ -1,0 +1,42 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ArticleCard from '../../components/ui/ArticleCard.astro';
+
+export async function getStaticPaths() {
+  const articles = await getCollection('articles', ({ data }) => !data.draft);
+  const tags = new Set(articles.flatMap((entry) => entry.data.tags));
+  return Array.from(tags).map((tag) => ({
+    params: { tag },
+    props: {
+      entries: articles
+        .filter((entry) => entry.data.tags.includes(tag))
+        .sort((a, b) => b.data.publishedAt.valueOf() - a.data.publishedAt.valueOf()),
+    },
+  }));
+}
+
+const { tag } = Astro.params;
+const { entries } = Astro.props;
+---
+
+<BaseLayout title={`#${tag}`} description={`「${tag}」タグの記事一覧`}>
+  <div class="max-w-5xl mx-auto px-4 py-10">
+    <h1 class="text-2xl font-extrabold mb-6" style="color: var(--color-text);">#{tag}</h1>
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      {
+        entries.map((entry) => (
+          <ArticleCard
+            slug={entry.id}
+            title={entry.data.title}
+            description={entry.data.description}
+            emoji={entry.data.emoji}
+            category={entry.data.category}
+            tags={entry.data.tags}
+            publishedAt={entry.data.publishedAt}
+          />
+        ))
+      }
+    </div>
+  </div>
+</BaseLayout>

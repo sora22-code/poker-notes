@@ -1,0 +1,19 @@
+---
+interface Props {
+  type?: 'info' | 'alert';
+}
+
+const { type = 'info' } = Astro.props;
+
+const STYLE = {
+  info: { bg: 'var(--color-accent-soft)', fg: 'var(--color-accent)', icon: 'ℹ️' },
+  alert: { bg: 'color-mix(in srgb, var(--color-poker-raise) 12%, transparent)', fg: 'var(--color-poker-raise)', icon: '⚠️' },
+}[type];
+---
+
+<div class="not-prose flex gap-3 rounded-lg border-l-4 p-4 my-5" style={`background: ${STYLE.bg}; border-color: ${STYLE.fg};`}>
+  <span aria-hidden="true">{STYLE.icon}</span>
+  <div class="text-sm leading-relaxed" style={`color: var(--color-text);`}>
+    <slot />
+  </div>
+</div>

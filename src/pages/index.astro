@@ -1,0 +1,86 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import ArticleCard from '../components/ui/ArticleCard.astro';
+
+const allArticles = (await getCollection('articles', ({ data }) => !data.draft)).sort(
+  (a, b) => b.data.publishedAt.valueOf() - a.data.publishedAt.valueOf(),
+);
+---
+
+<BaseLayout title="">
+  <div class="max-w-5xl mx-auto px-4 py-10">
+    <section class="mb-10">
+      <h1 class="text-2xl sm:text-3xl font-extrabold mb-2" style="color: var(--color-text);">poker-notes</h1>
+      <p class="text-base" style="color: var(--color-text-muted);">
+        実戦で上手くいったプレー、反省したプレーを言語化する、エンジニアのためのポーカー技術ブログ。
+      </p>
+    </section>
+
+    <div class="flex gap-2 mb-6" role="tablist" aria-label="記事カテゴリ">
+      <button
+        type="button"
+        class="tab-btn text-sm font-bold px-4 py-2 rounded-full border cursor-pointer"
+        data-filter="all"
+        aria-selected="true"
+      >
+        すべて
+      </button>
+      <button type="button" class="tab-btn text-sm font-bold px-4 py-2 rounded-full border cursor-pointer" data-filter="strategy">
+        戦略解説
+      </button>
+      <button type="button" class="tab-btn text-sm font-bold px-4 py-2 rounded-full border cursor-pointer" data-filter="review">
+        ハンドレビュー
+      </button>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4" id="article-grid">
+      {
+        allArticles.map((entry) => (
+          <div class="article-item" data-category={entry.data.category}>
+            <ArticleCard
+              slug={entry.id}
+              title={entry.data.title}
+              description={entry.data.description}
+              emoji={entry.data.emoji}
+              category={entry.data.category}
+              tags={entry.data.tags}
+              publishedAt={entry.data.publishedAt}
+            />
+          </div>
+        ))
+      }
+      {allArticles.length === 0 && <p style="color: var(--color-text-muted);">まだ記事がありません。</p>}
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .tab-btn {
+    background: var(--color-surface);
+    border-color: var(--color-border);
+    color: var(--color-text-muted);
+  }
+  .tab-btn[aria-selected='true'] {
+    background: var(--color-accent);
+    border-color: var(--color-accent);
+    color: #fff;
+  }
+</style>
+
+<script>
+  const buttons = document.querySelectorAll<HTMLButtonElement>('.tab-btn');
+  const items = document.querySelectorAll<HTMLElement>('.article-item');
+
+  buttons.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      buttons.forEach((b) => b.setAttribute('aria-selected', 'false'));
+      btn.setAttribute('aria-selected', 'true');
+      const filter = btn.dataset.filter;
+      items.forEach((item) => {
+        const show = filter === 'all' || item.dataset.category === filter;
+        item.style.display = show ? '' : 'none';
+      });
+    });
+  });
+</script>

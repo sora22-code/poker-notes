@@ -1,0 +1,325 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Noto Sans JP", ui-sans-serif, system-ui, -apple-system, "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+}
+
+:root {
+  color-scheme: light;
+
+  /* base */
+  --color-bg: #f1f5f9;
+  --color-surface: #ffffff;
+  --color-surface-muted: #f8fafc;
+  --color-border: #e2e8f0;
+  --color-text: #0f172a;
+  --color-text-muted: #64748b;
+
+  /* brand accent (blue/teal) */
+  --color-accent: #2563eb;
+  --color-accent-hover: #1d4ed8;
+  --color-accent-soft: #dbeafe;
+  --color-teal: #0d9488;
+  --color-teal-soft: #ccfbf1;
+
+  /* semantic tags */
+  --color-tag-strategy: #2563eb;
+  --color-tag-review: #d97706;
+
+  /* poker semantics */
+  --color-poker-raise: #dc2626;
+  --color-poker-call: #16a34a;
+  --color-poker-fold: #94a3b8;
+  --color-poker-pot: #16a34a;
+  --color-poker-bet: #2563eb;
+
+  /* poker table (article-diagram redesign: bright, low-clutter) */
+  --poker-table-bg: #fefaf0;
+  --poker-felt: #d3f0e0;
+  --poker-felt-border: #2f7a5c;
+  --poker-seat-bg: #ffffff;
+  --poker-seat-border: #e2e8f0;
+  --poker-seat-hero-ring: #2563eb;
+  --poker-seat-active-ring: #f59e0b;
+  --poker-seat-fold-opacity: 0.45;
+  --poker-pot-badge-bg: #16a34a;
+  --poker-pot-badge-fg: #ffffff;
+  --poker-bet-badge-bg: #2563eb;
+  --poker-bet-badge-fg: #ffffff;
+
+  /* 4-color deck */
+  --card-spade: #1e293b;
+  --card-heart: #dc2626;
+  --card-diamond: #2563eb;
+  --card-club: #059669;
+  --card-face-bg: #ffffff;
+  --card-back-bg: #2563eb;
+  --card-border: #cbd5e1;
+
+  /* code blocks */
+  --code-bg: #1e293b;
+  --code-tab-bg: #0f172a;
+  --code-fg: #e2e8f0;
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+
+  --color-bg: #0b1120;
+  --color-surface: #131c31;
+  --color-surface-muted: #0f172a;
+  --color-border: #263449;
+  --color-text: #e2e8f0;
+  --color-text-muted: #94a3b8;
+
+  --color-accent: #60a5fa;
+  --color-accent-hover: #93c5fd;
+  --color-accent-soft: #1e3a5f;
+  --color-teal: #2dd4bf;
+  --color-teal-soft: #134e4a;
+
+  --color-tag-strategy: #60a5fa;
+  --color-tag-review: #fbbf24;
+
+  --color-poker-raise: #f87171;
+  --color-poker-call: #4ade80;
+  --color-poker-fold: #64748b;
+  --color-poker-pot: #4ade80;
+  --color-poker-bet: #60a5fa;
+
+  --poker-table-bg: #131c31;
+  --poker-felt: #12352a;
+  --poker-felt-border: #2f7a5c;
+  --poker-seat-bg: #1b2740;
+  --poker-seat-border: #2a3a56;
+  --poker-seat-hero-ring: #60a5fa;
+  --poker-seat-active-ring: #fbbf24;
+  --poker-seat-fold-opacity: 0.4;
+  --poker-pot-badge-bg: #16a34a;
+  --poker-pot-badge-fg: #ffffff;
+  --poker-bet-badge-bg: #3b82f6;
+  --poker-bet-badge-fg: #ffffff;
+
+  --card-spade: #cbd5e1;
+  --card-heart: #f87171;
+  --card-diamond: #60a5fa;
+  --card-club: #34d399;
+  --card-face-bg: #1b2740;
+  --card-back-bg: #3b82f6;
+  --card-border: #334155;
+
+  --code-bg: #0a0f1c;
+  --code-tab-bg: #060a13;
+  --code-fg: #e2e8f0;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+
+    --color-bg: #0b1120;
+    --color-surface: #131c31;
+    --color-surface-muted: #0f172a;
+    --color-border: #263449;
+    --color-text: #e2e8f0;
+    --color-text-muted: #94a3b8;
+
+    --color-accent: #60a5fa;
+    --color-accent-hover: #93c5fd;
+    --color-accent-soft: #1e3a5f;
+    --color-teal: #2dd4bf;
+    --color-teal-soft: #134e4a;
+
+    --color-tag-strategy: #60a5fa;
+    --color-tag-review: #fbbf24;
+
+    --color-poker-raise: #f87171;
+    --color-poker-call: #4ade80;
+    --color-poker-fold: #64748b;
+    --color-poker-pot: #4ade80;
+    --color-poker-bet: #60a5fa;
+
+    --poker-table-bg: #131c31;
+    --poker-felt: #12352a;
+    --poker-felt-border: #2f7a5c;
+    --poker-seat-bg: #1b2740;
+    --poker-seat-border: #2a3a56;
+    --poker-seat-hero-ring: #60a5fa;
+    --poker-seat-active-ring: #fbbf24;
+    --poker-seat-fold-opacity: 0.4;
+
+    --card-spade: #cbd5e1;
+    --card-heart: #f87171;
+    --card-diamond: #60a5fa;
+    --card-club: #34d399;
+    --card-face-bg: #1b2740;
+    --card-back-bg: #3b82f6;
+    --card-border: #334155;
+
+    --code-bg: #0a0f1c;
+    --code-tab-bg: #060a13;
+    --code-fg: #e2e8f0;
+  }
+}
+
+* {
+  border-color: var(--color-border);
+}
+
+html {
+  background: var(--color-bg);
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-sans);
+  font-size: 16px;
+  line-height: 1.8;
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background: var(--color-accent-soft);
+}
+
+.prose-article :where(h2, h3, h4) {
+  scroll-margin-top: 5rem;
+}
+
+.prose-article h2 {
+  font-size: 1.4rem;
+  font-weight: 800;
+  margin: 2.5rem 0 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid var(--color-border);
+}
+
+.prose-article h3 {
+  font-size: 1.15rem;
+  font-weight: 700;
+  margin: 2rem 0 0.75rem;
+}
+
+.prose-article h4 {
+  font-size: 1rem;
+  font-weight: 700;
+  margin: 1.5rem 0 0.5rem;
+}
+
+.prose-article p {
+  margin: 1rem 0;
+}
+
+.prose-article ul,
+.prose-article ol {
+  margin: 1rem 0;
+  padding-left: 1.5rem;
+}
+
+.prose-article ul {
+  list-style: disc;
+}
+
+.prose-article ol {
+  list-style: decimal;
+}
+
+.prose-article li {
+  margin: 0.35rem 0;
+}
+
+.prose-article a {
+  color: var(--color-accent);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.prose-article blockquote {
+  margin: 1.25rem 0;
+  padding: 0.25rem 0 0.25rem 1rem;
+  border-left: 3px solid var(--color-border);
+  color: var(--color-text-muted);
+}
+
+.prose-article strong {
+  font-weight: 700;
+}
+
+.prose-article code:not(pre code) {
+  background: var(--color-surface-muted);
+  border: 1px solid var(--color-border);
+  border-radius: 0.3rem;
+  padding: 0.1rem 0.4rem;
+  font-size: 0.85em;
+  font-family: var(--font-mono);
+}
+
+.prose-article table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.25rem 0;
+  font-size: 0.9rem;
+}
+
+.prose-article th,
+.prose-article td {
+  border: 1px solid var(--color-border);
+  padding: 0.5rem 0.75rem;
+  text-align: left;
+}
+
+.prose-article th {
+  background: var(--color-surface-muted);
+  font-weight: 700;
+}
+
+.prose-article hr {
+  border: none;
+  border-top: 1px solid var(--color-border);
+  margin: 2.5rem 0;
+}
+
+/* code blocks (Shiki) */
+.prose-article pre,
+.code-file-body pre {
+  border-radius: 0.5rem;
+  padding: 1rem 1.1rem;
+  font-size: 0.85rem;
+  line-height: 1.7;
+  overflow-x: auto;
+}
+
+.code-file-body pre {
+  border-radius: 0;
+}
+
+.code-block-wrap {
+  position: relative;
+}
+
+.code-block-wrap .copy-code-btn {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 0.25rem 0.6rem;
+  border-radius: 999px;
+  border: 1px solid rgba(148, 163, 184, 0.4);
+  background: rgba(15, 23, 42, 0.55);
+  color: #e2e8f0;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.code-block-wrap:hover .copy-code-btn {
+  opacity: 1;
+}
+
+.code-block-wrap .copy-code-btn:hover {
+  background: rgba(15, 23, 42, 0.8);
+}

@@ -1,0 +1,19 @@
+---
+interface Props {
+  title: string;
+}
+
+const { title } = Astro.props;
+---
+
+<div class="not-prose my-5 rounded-lg overflow-hidden border" style="border-color: var(--color-border);">
+  <div
+    class="flex items-center px-4 py-2 text-xs font-mono tracking-wide"
+    style="background: var(--code-tab-bg); color: var(--code-fg);"
+  >
+    <span>{title}</span>
+  </div>
+  <div class="code-file-body">
+    <slot />
+  </div>
+</div>

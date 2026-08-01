@@ -1,0 +1,57 @@
+---
+interface Props {
+  slug: string;
+  title: string;
+  description: string;
+  emoji: string;
+  category: 'strategy' | 'review';
+  tags: string[];
+  publishedAt: Date;
+}
+
+const { slug, title, description, emoji, category, tags, publishedAt } = Astro.props;
+
+const CATEGORY_LABEL: Record<string, string> = {
+  strategy: '戦略解説',
+  review: 'ハンドレビュー',
+};
+
+const dateLabel = publishedAt.toLocaleDateString('ja-JP', { year: 'numeric', month: 'short', day: 'numeric' });
+---
+
+<a
+  href={`/articles/${slug}`}
+  class="block rounded-xl border p-4 transition-shadow hover:shadow-md"
+  style="background: var(--color-surface); border-color: var(--color-border);"
+>
+  <div class="flex items-start gap-3">
+    <span class="text-3xl leading-none" aria-hidden="true">{emoji}</span>
+    <div class="min-w-0 flex-1">
+      <div class="flex items-center gap-2 mb-1">
+        <span
+          class="text-[11px] font-bold px-2 py-0.5 rounded-full"
+          style={`background: color-mix(in srgb, ${category === 'strategy' ? 'var(--color-tag-strategy)' : 'var(--color-tag-review)'} 15%, transparent); color: ${category === 'strategy' ? 'var(--color-tag-strategy)' : 'var(--color-tag-review)'};`}
+        >
+          {CATEGORY_LABEL[category]}
+        </span>
+        <time class="text-xs" style="color: var(--color-text-muted);">{dateLabel}</time>
+      </div>
+      <h3 class="font-bold text-base leading-snug mb-1 truncate" style="color: var(--color-text);">{title}</h3>
+      <p class="text-sm line-clamp-2" style="color: var(--color-text-muted);">{description}</p>
+      {
+        tags.length > 0 && (
+          <div class="flex flex-wrap gap-1.5 mt-2">
+            {tags.map((tag) => (
+              <span
+                class="text-[11px] px-1.5 py-0.5 rounded"
+                style="background: var(--color-surface-muted); color: var(--color-text-muted);"
+              >
+                #{tag}
+              </span>
+            ))}
+          </div>
+        )
+      }
+    </div>
+  </div>
+</a>

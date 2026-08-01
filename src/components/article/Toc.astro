@@ -1,0 +1,33 @@
+---
+interface Heading {
+  depth: number;
+  slug: string;
+  text: string;
+}
+
+interface Props {
+  headings: Heading[];
+}
+
+const { headings } = Astro.props;
+const items = headings.filter((h) => h.depth >= 2 && h.depth <= 3);
+---
+
+{
+  items.length > 0 && (
+    <nav class="hidden xl:block sticky top-20 max-h-[70vh] overflow-y-auto text-sm" aria-label="目次">
+      <p class="font-bold mb-2" style="color: var(--color-text);">
+        目次
+      </p>
+      <ul class="space-y-1.5">
+        {items.map((h) => (
+          <li style={`padding-left: ${(h.depth - 2) * 0.75}rem;`}>
+            <a href={`#${h.slug}`} class="hover:opacity-80 line-clamp-2" style="color: var(--color-text-muted);">
+              {h.text}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </nav>
+  )
+}
