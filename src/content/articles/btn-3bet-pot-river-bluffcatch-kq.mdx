@@ -1,0 +1,139 @@
+---
+title: "3ベットポットのリバーオールイン、KQsでのブラフキャッチ判断"
+description: "BTNオープンにBBが3ベット、コールして迎えたリバー。トップペア・キッカーKQsで相手のオールインに直面したときに、ポットオッズから必要勝率を出し、相手のバリュー/ブラフ比率を見積もってコールの是非を判断したハンドの記録。"
+emoji: "🎯"
+category: "review"
+tags: ["3ベットポット", "ブラフキャッチ", "ポットオッズ", "6-max"]
+publishedAt: 2026-08-01
+draft: false
+---
+
+import PokerTable from '../../components/poker/PokerTable';
+import HandRangeChart from '../../components/poker/HandRangeChart';
+import EquityCalculator from '../../components/poker/EquityCalculator';
+import ActionLine from '../../components/poker/ActionLine';
+import Message from '../../components/article/Message.astro';
+
+3ベットポットでポストフロップを深く進めると、リバーで大きなオールインに直面してハンド単体の強さだけでは判断しづらい場面に何度も出会います。今回はBTNオープン→BB3ベット→コールという典型的な3ベットポットで、K♠Q♠を持ってリバーのオールインをコールするかどうかを、感覚ではなく数字で判断したハンドを振り返ります。
+
+## 状況設定
+
+- フォーマット: 6-max キャッシュゲーム (NL100)
+- スタック: 全員100bbエフェクティブ
+- ポジション: Hero は BTN、Villain は BB
+- Villain のイメージ: 3ベット頻度がやや高めのアグレッシブなレギュラー
+
+<PokerTable
+  client:visible
+  street="preflop"
+  pot={18}
+  players={[
+    { position: 'BTN', stack: 91, isHero: true, cards: ['Ks', 'Qs'] },
+    { position: 'SB', stack: 100, folded: true },
+    { position: 'BB', stack: 91, bet: 9, isActive: true },
+  ]}
+  caption="BTN が 2.5bb オープン、BB が 9bb に3ベット。Hero(BTN) は K♠Q♠ でコール。"
+/>
+
+## プリフロップ: 3ベットへのコール
+
+<ActionLine
+  street="Preflop"
+  actions={[
+    { position: 'BTN', action: 'raise', amount: 2.5 },
+    { position: 'SB', action: 'fold' },
+    { position: 'BB', action: 'raise', amount: 9 },
+    { position: 'BTN', action: 'call', amount: 9 },
+  ]}
+/>
+
+KQsはポジションを取れる3ベットポットにおいて、フォールドにはやや強すぎ、4ベットするには相手のレンジに対してエクイティが不足しがちな「コールが中心になるハンド」です。ポジションを活かしてポストフロップでハンドを進めやすく、フロップでトップペアやフラッシュドロー、ストレートドローになりやすい打ちやすさも評価してコールを選びました。
+
+## フロップ〜ターン: トップペアで進める
+
+<ActionLine street="Flop" actions={[{ position: 'BB', action: 'bet', amount: 12 }, { position: 'BTN', action: 'call', amount: 12 }]} />
+
+フロップは Q♥8♣4♦。Heroはクイーンのトップペア、キッカーKという強いハンドを完成させました。BBは2/3ポット程度のCベットを打ち、Heroはコールします。
+
+<ActionLine street="Turn" actions={[{ position: 'BB', action: 'bet', amount: 30 }, { position: 'BTN', action: 'call', amount: 30 }]} />
+
+ターンは T♥。ボードが Q-8-4-T と少しコネクトしてきましたが、Heroのトップペアはまだ十分に強いハンドです。BBはポットの7割程度のサイズでバレルを続け、Heroはコールを継続します。
+
+## リバー: オールインへの対応
+
+<ActionLine street="River" actions={[{ position: 'BB', action: 'raise', amount: 49 }]} />
+
+リバーは 2♠ (ボードとは関連の薄いブランク)。BBは残りスタック49bbを全てオールインしてきました。
+
+<PokerTable
+  client:visible
+  street="river"
+  pot={151}
+  board={['Qh', '8c', '4d', 'Th', '2s']}
+  players={[
+    { position: 'BTN', stack: 49, isHero: true, cards: ['Ks', 'Qs'] },
+    { position: 'BB', stack: 0, bet: 49, isActive: true },
+  ]}
+  caption="Q-8-4-T-2。Hero はクイーンのトップペア(キッカーK)。BB が 49bb オールイン。"
+/>
+
+まずポットオッズを整理します。オールイン前のポットは102bb、BBのベットが49bbなので、コール後の最終ポットは 102 + 49 + 49 = 200bb。Heroが49bbをコールして収支トントンになるために必要な勝率は次の通りです。
+
+```
+必要勝率 = コール額 ÷ 最終ポット
+        = 49 ÷ (102 + 49 + 49)
+        = 49 ÷ 200
+        = 24.5%
+```
+
+<Message type="info">
+オールインのポットオッズ計算は「コール額 ÷ (コール後の最終ポット)」で求められます。ポットが大きく、コール額が残りスタックに対して小さいほど、必要勝率は低くなります。今回のように3ベットポットが深く進んだ後のオールインは、相対的に必要勝率が低くなりやすい典型例です。
+</Message>
+
+次に、このスポットでBBがオールインするレンジを考えます。3ベットポットでリバーまでバレルを続けてオールインする相手のレンジは、典型的に「バリュー(セット、ストレート、上位ツーペア)」と「ブラフ(エースハイなど何も完成しなかったハンド)」に分かれるポラライズドレンジになります。
+
+<HandRangeChart
+  client:visible
+  title="BB のリバーオールインレンジ(想定)"
+  ranges={[
+    {
+      label: 'バリュー: セット・ストレート・トップツーペア (QQ, TT, 88, 44, J9, Q8)',
+      color: 'var(--color-poker-call)',
+      hands: 'QQ, TT, 88, 44, J9, Q8s, Q8o',
+    },
+    {
+      label: 'ブラフ: エースハイ止まり (AK, AJ, KJ)',
+      color: 'var(--color-poker-raise)',
+      hands: 'AK, AJ, KJ',
+    },
+  ]}
+/>
+
+このレンジを前提に、実際にHeroのK♠Q♠がどの程度の勝率を持つのかを計算します。
+
+<EquityCalculator
+  client:load
+  readonly={true}
+  iterations={20000}
+  hands={['KsQs', 'QQ, TT, 88, 44, J9, Q8s, Q8o, AK, AJ, KJ']}
+  board={['Qh', '8c', '4d', 'Th', '2s']}
+/>
+
+計算上の勝率は必要勝率24.5%を大きく上回ります。KQsのキッカーKがAK/AJ/KJのようなブラフ側のハンドを部分的にブロックしている(相手がそれらのハンドを持っている確率をわずかに下げている)ことに加え、このレンジ設定ではバリューよりブラフのコンボ数の方が多く、ポラライズドレンジ特有の「ブラフの比率が高くなりやすい」性質も反映されています。
+
+<Message type="alert">
+ここで重要なのは「感覚的に怖いから降りる」ではなく、必要勝率とレンジ全体に対する実際の勝率を数字で比較してから判断することです。今回のようにポットが大きく育った3ベットポットでは、直感よりもコールが正しくなるケースが多いという点は覚えておく価値があります。
+</Message>
+
+結果、Heroはコールしてショーダウン。BBはAJのブラフでした。
+
+## 結果と振り返り
+
+- プリフロップのコールは、ポジションとハンドのプレイアブルさを考えれば妥当な選択
+- フロップ・ターンのコールはトップペア良キッカーとして標準的なライン
+- リバーのコールはポットオッズと想定レンジに基づく計算上、明確にプラス期待値
+- 唯一の反省点は、BBのバレル頻度・オールイン頻度に関する実際の統計を取っていなかったこと。想定レンジが正しいかどうかは相手のプレイ履歴次第で変わるため、次回以降はより具体的なデータに基づいてレンジを構築したい
+
+## 学び
+
+3ベットポットでリバーの大きなオールインに直面したときは、感覚で降りる前に「コール額 ÷ 最終ポット」で必要勝率を出し、相手の想定レンジに対する実際の勝率と比較してから機械的に判断する。
