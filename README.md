@@ -26,7 +26,7 @@ npm run og        # 記事のOGP画像 (public/og/*.png) を再生成
 
 ```
 src/
-├── content/articles/     # 記事本体 (MDX)。フロントマターは src/content/config.ts で定義
+├── content/articles/     # 記事本体 (MDX)。フロントマターは src/content.config.ts で定義
 ├── components/
 │   ├── poker/             # ポーカー表示コンポーネント（PokerTable, HandRangeChart, EquityCalculator...）
 │   ├── article/            # 記事内で使う装飾コンポーネント（Message, Accordion, CodeFile, Toc）
