@@ -1,6 +1,7 @@
-import { createDeck, shuffle, stringToId, type CardString } from './deck';
+import { createDeck, shuffle, stringToId } from './deck';
 import { evaluate7 } from './evaluator';
 import { expandRangeToCombos } from './range';
+import type { CardString } from './types';
 
 export interface EquityResult {
   labels: string[];

@@ -1,0 +1,50 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+const tools = [
+  {
+    href: '/tools/article-composer',
+    emoji: '📝',
+    title: '記事コンポーザー',
+    description:
+      'frontmatter・状況設定・ストリートごとの本文とテーブル図/レンジ表を入力して、記事のMDXをまるごと組み立てるツール。',
+  },
+  {
+    href: '/tools/hand-editor',
+    emoji: '🃏',
+    title: 'ハンド図エディタ',
+    description: 'ポジション・スタック・ベット額・ボードを入力すると、単発のPokerTable用MDXコードを生成するツール。',
+  },
+];
+---
+
+<BaseLayout title="ツール" description="poker-notesの記事執筆を助けるツール一覧。">
+  <div class="max-w-5xl mx-auto px-4 py-10">
+    <header class="mb-6">
+      <h1 class="text-2xl sm:text-3xl font-extrabold mb-2" style="color: var(--color-text);">ツール</h1>
+      <p class="text-base" style="color: var(--color-text-muted);">記事執筆を助けるツール一覧です。</p>
+    </header>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      {
+        tools.map((tool) => (
+          <a
+            href={tool.href}
+            class="block rounded-xl border p-5 transition-shadow hover:shadow-md"
+            style="background: var(--color-surface); border-color: var(--color-border);"
+          >
+            <span class="text-3xl" aria-hidden="true">
+              {tool.emoji}
+            </span>
+            <h2 class="font-bold text-lg mt-2 mb-1" style="color: var(--color-text);">
+              {tool.title}
+            </h2>
+            <p class="text-sm" style="color: var(--color-text-muted);">
+              {tool.description}
+            </p>
+          </a>
+        ))
+      }
+    </div>
+  </div>
+</BaseLayout>

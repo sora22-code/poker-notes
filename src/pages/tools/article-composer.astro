@@ -1,0 +1,20 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ArticleComposer from '../../components/tools/composer/ArticleComposer';
+---
+
+<BaseLayout
+  title="記事コンポーザー"
+  description="frontmatter・状況設定・ストリートごとの本文とテーブル図/レンジ表を入力すると、poker-notesの記事MDXを組み立てられるツール。"
+>
+  <div class="max-w-7xl mx-auto px-4 py-10">
+    <header class="mb-6">
+      <h1 class="text-2xl sm:text-3xl font-extrabold mb-2" style="color: var(--color-text);">記事コンポーザー</h1>
+      <p class="text-base" style="color: var(--color-text-muted);">
+        frontmatterと状況設定を入力し、プリフロップ〜リバーの各セクションに本文・テーブル図・レンジ表を追加していくと、記事のMDXが組み上がります。フロップ以降のテーブル図は直前のストリートの状態から自動で引き継がれるので、差分だけ入力すれば完成します。編集内容はこのブラウザに自動保存されます。
+      </p>
+    </header>
+
+    <ArticleComposer client:load />
+  </div>
+</BaseLayout>
