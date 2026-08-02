@@ -1,0 +1,72 @@
+---
+interface Props {
+  showRangeHelp?: boolean;
+}
+
+const { showRangeHelp = false } = Astro.props;
+---
+
+<details
+  open
+  class="not-prose mb-6 rounded-xl border"
+  style="background: var(--color-surface); border-color: var(--color-border);"
+>
+  <summary class="cursor-pointer select-none px-4 py-3 font-bold text-sm" style="color: var(--color-text);">
+    📖 用語・記法ガイド（初めての方はご覧ください）
+  </summary>
+  <div class="px-4 pb-4 pt-1 text-sm space-y-3" style="color: var(--color-text-muted);">
+    <div>
+      <p class="font-semibold mb-0.5" style="color: var(--color-text);">カードの入力（例: As, Td, 9h）</p>
+      <p>
+        <strong style="color: var(--color-text);">ランク</strong>(2,3,4,5,6,7,8,9,T,J,Q,K,A のいずれか1文字。Tは10)
+        + <strong style="color: var(--color-text);">スート</strong>(s=♠ / h=♥ / d=♦ / c=♣)
+        の2文字で入力します。例えば <code>As</code> はスペードのA、<code>Td</code> はダイヤの10です。テキスト欄に直接入力するか、右側のプルダウンから選んでも入力できます。
+      </p>
+    </div>
+
+    <div>
+      <p class="font-semibold mb-0.5" style="color: var(--color-text);">Hero / 手番(アクティブ)</p>
+      <p>
+        <strong style="color: var(--color-text);">Hero</strong> は記事の主人公、つまり「自分」の視点のプレイヤーです。テーブル図では青い枠で表示されます。
+        <strong style="color: var(--color-text);">手番(アクティブ)</strong> は今アクションする番のプレイヤーで、テーブル図ではオレンジの枠で表示されます。どちらもポジションのプルダウンから選びます。
+      </p>
+    </div>
+
+    {
+      showRangeHelp && (
+        <div>
+          <p class="font-semibold mb-0.5" style="color: var(--color-text);">
+            レンジの入力（例: 22+, ATs+, KQo）
+          </p>
+          <p>
+            「hands」欄には個別のカードではなく、ハンドの範囲(レンジ)を記法で入力します。
+            <code>AA</code>(ポケットAA)、<code>AKs</code>(エースキングのスーテッド=同じスート)、
+            <code>AKo</code>(エースキングのオフスート=違うスート)、<code>AK</code>(AKsとAKoの両方)、
+            <code>22+</code>(22以上の全ポケットペア)、<code>ATs+</code>(ATs以上のスーテッドAx)のように書き、
+            カンマ区切りで複数並べられます(例: <code>22+, ATs+, KQo</code>)。プリセットを選ぶと自動で入力されるので、まずはプリセットから試すのがおすすめです。
+          </p>
+        </div>
+      )
+    }
+
+    {
+      showRangeHelp && (
+        <div>
+          <p class="font-semibold mb-0.5" style="color: var(--color-text);">
+            レンジ表の「約◯%」とは
+          </p>
+          <p>
+            ポーカーのスターティングハンドは全部で169通り(ポケットペア13種+スーテッド78種+オフスート78種)あります。「約15%」は、そのレンジがこの169通りのうち何%を占めるかを表しています。パーセンテージは入力したレンジ記法から自動計算されるので、手で数える必要はありません。
+          </p>
+        </div>
+      )
+    }
+
+    <div>
+      <p class="font-semibold mb-0.5" style="color: var(--color-text);">MDXコードとは</p>
+      <p>
+        このサイトの記事は<strong style="color: var(--color-text);">MDX</strong>(文章の中にプログラムの部品を埋め込める記法)で書かれています。「MDXをコピー」や「.mdxをダウンロード」で得られるコードは、そのまま記事ファイル(<code>.mdx</code>)に貼り付けて使うためのものです。自分でコードの意味を理解する必要はなく、貼り付けるだけでテーブル図やレンジ表が記事に表示されます。
+      </p>
+    </div>
+  </div>
+</details>

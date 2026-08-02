@@ -118,7 +118,7 @@ export default function TableStateForm({ value, onChange, lockStreet }: TableSta
 
         <div>
           <span className="text-xs" style={{ color: 'var(--color-text-muted)' }}>
-            ボード (最大5枚)
+            ボード (最大5枚・例: As, Td)
           </span>
           <div className="flex flex-wrap gap-2 mt-1">
             {value.board.map((c, i) => (

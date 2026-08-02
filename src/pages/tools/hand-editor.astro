@@ -1,6 +1,7 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import HandEditor from '../../components/tools/HandEditor';
+import ToolHelpBox from '../../components/tools/ToolHelpBox.astro';
 ---
 
 <BaseLayout
@@ -14,6 +15,8 @@ import HandEditor from '../../components/tools/HandEditor';
         ポジション・スタック・ベット額・ボードを入力すると、右側にテーブル図がリアルタイムで表示されます。「MDXをコピー」で記事にそのまま貼り付けられるコードが得られます。
       </p>
     </header>
+
+    <ToolHelpBox />
 
     <HandEditor client:load />
   </div>
