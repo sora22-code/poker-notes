@@ -1,0 +1,16 @@
+---
+interface Props {
+  term: string;
+  definition: string;
+}
+
+const { term, definition } = Astro.props;
+---
+
+<span class="glossary-term" tabindex="0">
+  <slot />
+  <span class="glossary-popover" role="tooltip">
+    <strong class="glossary-popover-term">{term}</strong>
+    <span class="glossary-popover-definition">{definition}</span>
+  </span>
+</span>

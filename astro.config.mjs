@@ -4,6 +4,7 @@ import { defineConfig } from 'astro/config';
 import react from '@astrojs/react';
 import mdx from '@astrojs/mdx';
 import tailwindcss from '@tailwindcss/vite';
+import { remarkGlossary } from './src/lib/markdown/remark-glossary.ts';
 
 // https://astro.build/config
 export default defineConfig({
@@ -12,6 +13,7 @@ export default defineConfig({
   integrations: [react(), mdx()],
 
   markdown: {
+    remarkPlugins: [remarkGlossary],
     shikiConfig: {
       themes: {
         light: 'github-light',
