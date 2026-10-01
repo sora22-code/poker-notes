@@ -11,6 +11,14 @@ const articles = defineCollection({
     tags: z.array(z.string()).default([]),
     publishedAt: z.coerce.date(),
     updatedAt: z.coerce.date().optional(),
+    game: z
+      .object({
+        format: z.enum(['cash', 'tournament']),
+        tableSize: z.union([z.literal(6), z.literal(9)]),
+        stakes: z.string().optional(),
+        effectiveStack: z.number().optional(),
+      })
+      .optional(),
     draft: z.boolean().default(false),
   }),
 });

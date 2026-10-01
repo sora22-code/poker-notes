@@ -1,4 +1,6 @@
 ---
+import { gameSummary, type ArticleGame } from '../../lib/articleMeta';
+
 interface Props {
   slug: string;
   title: string;
@@ -7,9 +9,10 @@ interface Props {
   category: 'strategy' | 'review';
   tags: string[];
   publishedAt: Date;
+  game?: ArticleGame;
 }
 
-const { slug, title, description, emoji, category, tags, publishedAt } = Astro.props;
+const { slug, title, description, emoji, category, tags, publishedAt, game } = Astro.props;
 
 const CATEGORY_LABEL: Record<string, string> = {
   strategy: '戦略解説',
@@ -37,6 +40,13 @@ const dateLabel = publishedAt.toLocaleDateString('ja-JP', { year: 'numeric', mon
         <time class="text-xs" style="color: var(--color-text-muted);">{dateLabel}</time>
       </div>
       <h3 class="font-bold text-base leading-snug mb-1 truncate" style="color: var(--color-text);">{title}</h3>
+      {
+        game && (
+          <p class="text-[11px] font-semibold mb-1" style="color: var(--color-teal);">
+            {gameSummary(game)}
+          </p>
+        )
+      }
       <p class="text-sm line-clamp-2" style="color: var(--color-text-muted);">{description}</p>
       {
         tags.length > 0 && (

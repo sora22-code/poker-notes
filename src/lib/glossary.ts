@@ -8,6 +8,7 @@ export interface GlossaryEntry {
 }
 
 export const GLOSSARY: GlossaryEntry[] = [
+  { term: 'NLH', definition: 'No-Limit Hold\'em(ノーリミットホールデム)。ベット額に上限がなく、いつでも手持ちのチップ全額まで賭けられるテキサスホールデム。', aliases: ['ノーリミットホールデム'] },
   { term: 'UTG', definition: 'Under The Gun。プリフロップで最初にアクションするポジション。後ろに全員が残っているため最もタイトなレンジが要求される。' },
   { term: 'HJ', definition: 'ハイジャック。CO(カットオフ)の1つ前のポジション。UTGよりは広く、COよりは狭いレンジでオープンする。' },
   { term: 'CO', definition: 'カットオフ。BTN(ボタン)の1つ前のポジション。後ろの人数が少なくポジションも比較的良いため、レンジを広げやすい。' },
@@ -15,6 +16,8 @@ export const GLOSSARY: GlossaryEntry[] = [
   { term: 'SB', definition: 'スモールブラインド。プリフロップで強制的に小さいベットを払うポジション。ポストフロップは常にBBに対してポジション不利になる。' },
   { term: 'BB', definition: 'ビッグブラインド。プリフロップで強制的にSBの倍額を払うポジション。既に投資済みのため、オープンに対して最も広くディフェンスできる。' },
   { term: '3ベット', definition: 'オープンレイズに対する再レイズ。プリフロップでの2回目のレイズを指す。', aliases: ['3ベットポット'] },
+  { term: 'シングルレイズポット', definition: 'プリフロップでレイズが1回だけ入り、それにコールしてフロップを迎えたポット。SRP(Single Raised Pot)とも呼ぶ。', aliases: ['SRP'] },
+  { term: 'リンプ', definition: 'プリフロップでレイズせず、BBと同額をコールして参加すること。' },
   { term: '4ベット', definition: '3ベットに対するさらなる再レイズ。プリフロップでの3回目のレイズを指す。' },
   { term: 'GTO', definition: 'Game Theory Optimal。相手にどう対応されても長期的に搾取されない、ゲーム理論上最適なプレー方針のこと。' },
   { term: 'エクイティ', definition: 'ショーダウンまで進んだ場合に、そのハンド(またはレンジ)が勝つ確率の期待値。モンテカルロ法などで概算できる。' },

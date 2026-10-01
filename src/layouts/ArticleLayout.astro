@@ -1,6 +1,7 @@
 ---
 import BaseLayout from './BaseLayout.astro';
 import Toc from '../components/article/Toc.astro';
+import { gameSummary, type ArticleGame } from '../lib/articleMeta';
 
 interface Heading {
   depth: number;
@@ -16,11 +17,12 @@ interface Props {
   tags: string[];
   publishedAt: Date;
   updatedAt?: Date;
+  game?: ArticleGame;
   headings: Heading[];
   ogImage?: string;
 }
 
-const { title, description, emoji, category, tags, publishedAt, updatedAt, headings, ogImage } = Astro.props;
+const { title, description, emoji, category, tags, publishedAt, updatedAt, game, headings, ogImage } = Astro.props;
 
 const CATEGORY_LABEL: Record<string, string> = {
   strategy: '戦略解説',
@@ -52,6 +54,14 @@ const updatedLabel = updatedAt?.toLocaleDateString('ja-JP', { year: 'numeric', m
           <span>{title}</span>
         </h1>
         <p class="text-base" style="color: var(--color-text-muted);">{description}</p>
+        {game && (
+          <p
+            class="inline-block mt-3 text-xs font-semibold px-2.5 py-1 rounded-md border"
+            style="color: var(--color-teal); border-color: color-mix(in srgb, var(--color-teal) 35%, transparent); background: color-mix(in srgb, var(--color-teal) 8%, transparent);"
+          >
+            {gameSummary(game)}
+          </p>
+        )}
         {tags.length > 0 && (
           <div class="flex flex-wrap gap-1.5 mt-4">
             {tags.map((tag) => (

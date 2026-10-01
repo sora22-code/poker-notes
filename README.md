@@ -1,8 +1,8 @@
 # poker-notes
 
-エンジニア向けのポーカー技術記事メディア。実戦で上手くいったプレー、あるいは反省すべきプレーを言語化し、プリフロップからポストフロップまでの判断をレンジ表やエクイティ計算を交えて解説するブログです。
+エンジニア向けのNLH(ノーリミットホールデム)技術記事メディア。実戦で上手くいったプレー、あるいは反省すべきプレーを言語化し、プリフロップからリバーまでの判断をテーブル図・レンジ表・エクイティ計算を交えて解説するブログです。
 
-Astro 5系 + MDX + React（アイランド）+ Tailwind CSS 4 で構築し、Cloudflare Workers (Static Assets) にデプロイする想定です。
+Astro 7 + MDX + React（アイランド）+ Tailwind CSS 4 で構築し、Cloudflare Workers (Static Assets) にデプロイする想定です。
 
 ## 技術スタック
 
@@ -30,9 +30,11 @@ src/
 ├── components/
 │   ├── poker/             # ポーカー表示コンポーネント（PokerTable, HandRangeChart, EquityCalculator...）
 │   ├── article/            # 記事内で使う装飾コンポーネント（Message, Accordion, CodeFile, Toc）
+│   ├── tools/              # 執筆ツール（記事コンポーザー、ハンド図エディタ）
 │   └── ui/                 # サイト共通UI（Header, Footer, ArticleCard, ThemeToggle）
 ├── lib/
-│   ├── poker/               # 純粋なドメインロジック（types, deck, range, evaluator, equity）
+│   ├── poker/               # 純粋なドメインロジック（nlh=ハンドエンジン, cards, range, evaluator, equity, presets）
+│   ├── composer/            # 記事コンポーザーの下書きモデルとMDX生成
 │   └── workers/              # EquityCalculator が使う Web Worker
 ├── layouts/                 # BaseLayout / ArticleLayout
 └── pages/                   # index, articles/[slug], tags/[tag]
@@ -41,6 +43,17 @@ src/
 `lib/poker/` はUIから独立した純粋関数群です。`components/poker/` はその上に乗る表示層で、React state・DOM・Web Workerはここに閉じ込めています。
 
 ## 記事の書き方
+
+### おすすめ: 記事コンポーザーで書く
+
+`/tools/article-composer`（ヘッダーの「ツール」から）で、MDXを手書きせずに1本の記事を作れます。
+
+1. ハンド設定: キャッシュ/トーナメント、6-max/9-max、ステークス、エフェクティブスタック、Hero/Villainのポジションとハンド
+2. 各ストリート: ボードを入れ、アクションをボタンで入力(「フォールドで進める」「2.5x」「50%」などのショートカットあり)しながら本文を書く。アクションライン・テーブル図・状況設定はアクションから自動生成され、ポットとスタックも自動計算される
+3. 記事情報: タイトル・説明・スラッグ(ハンドから自動生成可)・タグ(ハンドから提案)
+4. 「.mdxをダウンロード」したファイルを `src/content/articles/` に置いてcommit
+
+金額はすべてbb単位で、SB 0.5bb / BB 1bb(トーナメントはBBアンティも)が自動で置かれます。ベット/レイズ額は「そのストリートでその人が出す合計」です。入力内容はブラウザに自動保存されます。図1枚分のMDXだけ欲しい場合は `/tools/hand-editor` を使います。
 
 ### フロントマター
 
@@ -53,13 +66,18 @@ category: "strategy" # または "review"
 tags: ["プリフロップ", "BB防衛"]
 publishedAt: 2026-08-01
 updatedAt: 2026-08-05   # 省略可
+game:                    # 省略可。記事カードと記事ヘッダーに「NLH 6-max キャッシュ · NL50 · 100bb」と表示
+  format: "cash"         # または "tournament"
+  tableSize: 6           # 6 または 9
+  stakes: "NL50"         # 省略可
+  effectiveStack: 100    # bb。省略可
 draft: false             # true にすると一覧・ビルド対象から除外
 ---
 ```
 
 推奨する記事構成（ハンドレビュー系）:
 
-1. 状況設定（フォーマット、スタック、ポジション、相手のイメージ）
+1. 状況設定（ゲーム、エフェクティブスタック、ポジション、Heroのハンド、相手のイメージ）
 2. プリフロップの判断
 3. フロップ / ターン / リバーの判断
 4. 結果と振り返り
@@ -100,7 +118,22 @@ draft: false             # true にすると一覧・ビルド対象から除外
 />
 ```
 
-`players[].position` は `UTG | UTG1 | UTG2 | LJ | HJ | CO | BTN | SB | BB`。`isHero` を付けたプレイヤーがテーブル下部中央に自動配置されます。
+`players[].position` は `UTG | UTG1 | UTG2 | LJ | HJ | CO | BTN | SB | BB`。`isHero` を付けたプレイヤーがテーブル下部中央に自動配置されます。 金額(stack/bet/pot)はbb単位で、表示にも「bb」が付きます。7人以上のときは座席が自動でコンパクト表示になります。
+
+### ActionLine
+
+ストリートのアクション履歴。`action` は `fold | check | call | bet | raise | allin`、`amount` はそのストリートでの合計額(bb)です。
+
+```mdx
+<ActionLine
+  street="Preflop"
+  actions={[
+    { position: 'BTN', action: 'raise', amount: 2.5 },
+    { position: 'SB', action: 'fold' },
+    { position: 'BB', action: 'call', amount: 2.5 },
+  ]}
+/>
+```
 
 ### HandRangeChart
 
