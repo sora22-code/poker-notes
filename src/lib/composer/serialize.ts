@@ -1,86 +1,112 @@
-import { generateTableCode } from './tableBlock';
+import { cardLabel, handCategory, isValidCard } from '../poker/cards';
+import { STREET_LABEL, computeHand, formatLabel, tableView, type HandResult } from '../poker/nlh';
+import { actionLineCode, pokerTableCode } from './codegen';
+import { isSectionVisible } from './draft';
 import { generateRangeCode } from './rangeBlock';
-import type { ArticleDraft, Section, SectionItem, SituationData } from './types';
+import type { ArticleDraft, SectionItem } from './types';
 
 function yamlString(s: string): string {
   return `"${s.replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"`;
 }
 
-function serializeFrontmatter(fm: ArticleDraft['frontmatter']): string {
-  const tags = fm.tags
+export function parseTags(raw: string): string[] {
+  return raw
     .split(',')
     .map((t) => t.trim())
     .filter(Boolean);
+}
+
+function serializeFrontmatter(draft: ArticleDraft): string {
+  const fm = draft.frontmatter;
+  const { setup } = draft.hand;
   const lines = [
     '---',
     `title: ${yamlString(fm.title)}`,
     `description: ${yamlString(fm.description)}`,
     `emoji: ${yamlString(fm.emoji || '🃏')}`,
     `category: ${yamlString(fm.category)}`,
-    `tags: [${tags.map(yamlString).join(', ')}]`,
+    `tags: [${parseTags(fm.tags).map(yamlString).join(', ')}]`,
     `publishedAt: ${fm.publishedAt}`,
-    'draft: false',
-    '---',
+    'game:',
+    `  format: ${yamlString(setup.format)}`,
+    `  tableSize: ${setup.tableSize}`,
   ];
+  if (setup.stakes.trim()) lines.push(`  stakes: ${yamlString(setup.stakes.trim())}`);
+  lines.push(`  effectiveStack: ${setup.effectiveStack}`, 'draft: false', '---');
   return lines.join('\n');
 }
 
-function serializeSituation(situation: SituationData): string {
-  const lines = ['## 状況設定', ''];
-  if (situation.format.trim()) lines.push(`- フォーマット: ${situation.format.trim()}`);
-  if (situation.stacks.trim()) lines.push(`- スタック: ${situation.stacks.trim()}`);
-  if (situation.heroPosition || situation.villainPosition) {
-    lines.push(`- ポジション: Hero は ${situation.heroPosition || '?'}、Villain は ${situation.villainPosition || '?'}`);
+/** The "状況設定" bullet list, shared by the MDX output and the live preview. */
+export function situationLines(draft: ArticleDraft): string[] {
+  const { setup } = draft.hand;
+  const lines = [`ゲーム: ${formatLabel(setup)}`];
+  if (setup.startStreet === 'preflop') {
+    lines.push(`エフェクティブスタック: ${setup.effectiveStack}bb`);
+  } else {
+    lines.push(`${STREET_LABEL[setup.startStreet]}開始時: ポット ${setup.startPot}bb / スタック ${setup.effectiveStack}bb`);
   }
-  if (situation.villainImage.trim()) lines.push(`- Villain のイメージ: ${situation.villainImage.trim()}`);
-  return lines.join('\n');
+  lines.push(
+    setup.villainPosition
+      ? `ポジション: Hero は ${setup.heroPosition}、Villain は ${setup.villainPosition}`
+      : `ポジション: Hero は ${setup.heroPosition}`,
+  );
+  const heroCards = setup.heroCards.filter(isValidCard);
+  if (heroCards.length === 2) {
+    lines.push(`Hero のハンド: ${heroCards.map(cardLabel).join(' ')} (${handCategory(heroCards)})`);
+  }
+  if (draft.villainImage.trim()) lines.push(`Villain のイメージ: ${draft.villainImage.trim()}`);
+  return lines;
 }
 
-function serializeItem(item: SectionItem): string {
-  if (item.kind === 'text') return item.markdown.trim();
-  if (item.kind === 'table') return generateTableCode(item.state);
-  return generateRangeCode(item.state);
+function serializeItem(item: SectionItem, draft: ArticleDraft, result: HandResult): string {
+  switch (item.kind) {
+    case 'text':
+      return item.markdown.trim();
+    case 'table': {
+      const view = tableView(draft.hand, result, item.street, item.timing, item);
+      return view ? pokerTableCode(view, item.caption) : '';
+    }
+    case 'actions': {
+      const res = result.streets[item.street];
+      return res.reached ? actionLineCode(res) : '';
+    }
+    case 'range':
+      return generateRangeCode(item.state);
+  }
 }
 
-function serializeSection(section: Section): string {
-  const body = section.items
-    .map(serializeItem)
-    .filter((s) => s.length > 0)
-    .join('\n\n');
-  return `## ${section.headingText}\n\n${body}`;
-}
-
-export function collectImports(draft: ArticleDraft): string[] {
-  const kinds = new Set<SectionItem['kind']>();
+export function collectImports(draft: ArticleDraft, result: HandResult): string[] {
+  const used = new Set<SectionItem['kind']>();
   for (const section of draft.sections) {
-    if (!section.enabled) continue;
-    for (const item of section.items) kinds.add(item.kind);
+    if (!isSectionVisible(section, result)) continue;
+    for (const item of section.items) {
+      if (serializeItem(item, draft, result)) used.add(item.kind);
+    }
   }
   const imports: string[] = [];
-  if (kinds.has('table')) imports.push("import PokerTable from '../../components/poker/PokerTable';");
-  if (kinds.has('range')) imports.push("import HandRangeChart from '../../components/poker/HandRangeChart';");
+  if (used.has('table')) imports.push("import PokerTable from '../../components/poker/PokerTable';");
+  if (used.has('actions')) imports.push("import ActionLine from '../../components/poker/ActionLine';");
+  if (used.has('range')) imports.push("import HandRangeChart from '../../components/poker/HandRangeChart';");
   return imports;
 }
 
-export function serializeDraft(draft: ArticleDraft): string {
-  const frontmatter = serializeFrontmatter(draft.frontmatter);
-  const imports = collectImports(draft);
-  const enabledSections = draft.sections.filter((s) => s.enabled);
+export function serializeDraft(draft: ArticleDraft, result: HandResult = computeHand(draft.hand)): string {
+  const parts: string[] = [`## 状況設定\n\n${situationLines(draft).map((l) => `- ${l}`).join('\n')}`];
 
-  const parts: string[] = [];
-  const situationText = serializeSituation(draft.situation);
-  if (situationText.split('\n').length > 2) parts.push(situationText);
-  for (const section of enabledSections) {
-    parts.push(serializeSection(section));
+  for (const section of draft.sections) {
+    if (!isSectionVisible(section, result)) continue;
+    const body = section.items
+      .map((item) => serializeItem(item, draft, result))
+      .filter(Boolean)
+      .join('\n\n');
+    parts.push(body ? `## ${section.headingText}\n\n${body}` : `## ${section.headingText}`);
   }
 
-  const body = parts.join('\n\n');
+  const imports = collectImports(draft, result);
   const importsBlock = imports.length > 0 ? `${imports.join('\n')}\n\n` : '';
-
-  return `${frontmatter}\n\n${importsBlock}${body}\n`;
+  return `${serializeFrontmatter(draft)}\n\n${importsBlock}${parts.join('\n\n')}\n`;
 }
 
 export function suggestFilename(draft: ArticleDraft): string {
-  const slug = draft.frontmatter.slug.trim();
-  return `${slug || 'untitled-article'}.mdx`;
+  return `${draft.frontmatter.slug.trim() || 'untitled-article'}.mdx`;
 }

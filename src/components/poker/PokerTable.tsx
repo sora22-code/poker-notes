@@ -76,7 +76,7 @@ export default function PokerTable({
             className="text-xs font-bold px-3 py-1 rounded-full"
             style={{ background: 'var(--poker-pot-badge-bg)', color: 'var(--poker-pot-badge-fg)' }}
           >
-            POT {pot.toLocaleString()}
+            POT {pot.toLocaleString()}bb
           </span>
         </div>
 
@@ -86,7 +86,7 @@ export default function PokerTable({
             className="absolute -translate-x-1/2 -translate-y-1/2"
             style={seatPosition(i, ordered.length)}
           >
-            <Seat player={p} showHoleCards={showHoleCards} />
+            <Seat player={p} showHoleCards={showHoleCards} compact={ordered.length > 6} />
           </div>
         ))}
       </div>

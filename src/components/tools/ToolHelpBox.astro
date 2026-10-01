@@ -4,6 +4,8 @@ interface Props {
 }
 
 const { showRangeHelp = false } = Astro.props;
+
+const strong = 'color: var(--color-text);';
 ---
 
 <details
@@ -12,60 +14,69 @@ const { showRangeHelp = false } = Astro.props;
   style="background: var(--color-surface); border-color: var(--color-border);"
 >
   <summary class="cursor-pointer select-none px-4 py-3 font-bold text-sm" style="color: var(--color-text);">
-    📖 用語・記法ガイド（初めての方はご覧ください）
+    使い方・用語ガイド（初めての方はご覧ください）
   </summary>
   <div class="px-4 pb-4 pt-1 text-sm space-y-3" style="color: var(--color-text-muted);">
     <div>
-      <p class="font-semibold mb-0.5" style="color: var(--color-text);">カードの入力（例: As, Td, 9h）</p>
+      <p class="font-semibold mb-0.5" style={strong}>前提: NLH・金額はbb単位</p>
       <p>
-        <strong style="color: var(--color-text);">ランク</strong>(2,3,4,5,6,7,8,9,T,J,Q,K,A のいずれか1文字。Tは10)
-        + <strong style="color: var(--color-text);">スート</strong>(s=♠ / h=♥ / d=♦ / c=♣)
-        の2文字で入力します。例えば <code>As</code> はスペードのA、<code>Td</code> はダイヤの10です。テキスト欄に直接入力するか、右側のプルダウンから選んでも入力できます。
+        NLH(ノーリミットホールデム)専用です。金額はすべて<strong style={strong}>bb</strong>(ビッグブラインド何枚分か)で入力します。SB 0.5bb・BB 1bbは自動で置かれ、トーナメントを選ぶとBBアンティも設定できます。
       </p>
     </div>
 
     <div>
-      <p class="font-semibold mb-0.5" style="color: var(--color-text);">Hero / 手番(アクティブ)</p>
+      <p class="font-semibold mb-0.5" style={strong}>アクションの入力</p>
       <p>
-        <strong style="color: var(--color-text);">Hero</strong> は記事の主人公、つまり「自分」の視点のプレイヤーです。テーブル図では青い枠で表示されます。
-        <strong style="color: var(--color-text);">手番(アクティブ)</strong> は今アクションする番のプレイヤーで、テーブル図ではオレンジの枠で表示されます。どちらもポジションのプルダウンから選びます。
+        各ストリートで「◯◯の番」と表示された人のアクションをボタンで選びます。ポット・スタック・次の手番は自動で計算されます。
+        ベット/レイズの金額は<strong style={strong}>そのストリートでその人が出す合計</strong>です(BBが1bb置いている状態でBTNが2.5bbにレイズ → 「2.5」)。
+        「2.5x」「50%」などのボタンを押すとその金額ですぐ確定します。
+        「HeroかVillainの番までフォールドで進める」を押すと、関係ない人のフォールドをまとめて入力できます。間違えたら「1つ戻す」で取り消せます。
+      </p>
+    </div>
+
+    <div>
+      <p class="font-semibold mb-0.5" style={strong}>カードの入力（例: As, Td, 9h）</p>
+      <p>
+        <strong style={strong}>ランク</strong>(2〜9, T, J, Q, K, A。Tは10)
+        + <strong style={strong}>スート</strong>(s=♠ / h=♥ / d=♦ / c=♣) の2文字です。<code>As</code> はスペードのA、<code>Td</code> はダイヤの10。プルダウンから選んでも入力できます。
+      </p>
+    </div>
+
+    <div>
+      <p class="font-semibold mb-0.5" style={strong}>Hero / Villain / テーブル図の表示タイミング</p>
+      <p>
+        <strong style={strong}>Hero</strong>は記事の主人公(自分)、<strong style={strong}>Villain</strong>は主な相手です。テーブル図ではHeroが青枠、今アクションする人がオレンジ枠になります。
+        図は「Heroの判断直前」が初期設定で、ほかに「ストリート開始時」「◯◯のレイズの後」などから選べます。
+      </p>
+    </div>
+
+    <div>
+      <p class="font-semibold mb-0.5" style={strong}>フロップから始めたいとき</p>
+      <p>
+        「どこから入力するか」を「フロップから」にすると、プリフロップを省略し、開始時のポットとスタックを指定してHeroとVillainの2人から始められます。戦略解説で「SRPのフロップ、ポット5.5bb」のような局面を描くときに便利です。
       </p>
     </div>
 
     {
       showRangeHelp && (
         <div>
-          <p class="font-semibold mb-0.5" style="color: var(--color-text);">
-            レンジの入力（例: 22+, ATs+, KQo）
+          <p class="font-semibold mb-0.5" style={strong}>
+            レンジ表の入力（例: 22+, ATs+, KQo）と「約◯%」
           </p>
           <p>
-            「hands」欄には個別のカードではなく、ハンドの範囲(レンジ)を記法で入力します。
-            <code>AA</code>(ポケットAA)、<code>AKs</code>(エースキングのスーテッド=同じスート)、
-            <code>AKo</code>(エースキングのオフスート=違うスート)、<code>AK</code>(AKsとAKoの両方)、
-            <code>22+</code>(22以上の全ポケットペア)、<code>ATs+</code>(ATs以上のスーテッドAx)のように書き、
-            カンマ区切りで複数並べられます(例: <code>22+, ATs+, KQo</code>)。プリセットを選ぶと自動で入力されるので、まずはプリセットから試すのがおすすめです。
+            レンジ表の「hands」欄には、個別のカードではなくハンドの範囲を書きます。<code>AA</code>(ポケットA)、<code>AKs</code>(AKの同じスート)、<code>AKo</code>(AKの違うスート)、<code>AK</code>(両方)、<code>22+</code>(22以上のポケットペア全部)、<code>ATs+</code>(ATs・AJs・AQs・AKs)。カンマ区切りで並べます。まずはプリセットから選ぶのがおすすめです。
           </p>
-        </div>
-      )
-    }
-
-    {
-      showRangeHelp && (
-        <div>
-          <p class="font-semibold mb-0.5" style="color: var(--color-text);">
-            レンジ表の「約◯%」とは
-          </p>
-          <p>
-            ポーカーのスターティングハンドは全部で169通り(ポケットペア13種+スーテッド78種+オフスート78種)あります。「約15%」は、そのレンジがこの169通りのうち何%を占めるかを表しています。パーセンテージは入力したレンジ記法から自動計算されるので、手で数える必要はありません。
+          <p class="mt-1">
+            「約◯%」は、2枚の組み合わせ全1326通り(ペア1種類=6通り、スーテッド=4通り、オフスート=12通り)のうち、そのレンジが何%を占めるかです。自動計算されます。
           </p>
         </div>
       )
     }
 
     <div>
-      <p class="font-semibold mb-0.5" style="color: var(--color-text);">MDXコードとは</p>
+      <p class="font-semibold mb-0.5" style={strong}>MDXとは</p>
       <p>
-        このサイトの記事は<strong style="color: var(--color-text);">MDX</strong>(文章の中にプログラムの部品を埋め込める記法)で書かれています。「MDXをコピー」や「.mdxをダウンロード」で得られるコードは、そのまま記事ファイル(<code>.mdx</code>)に貼り付けて使うためのものです。自分でコードの意味を理解する必要はなく、貼り付けるだけでテーブル図やレンジ表が記事に表示されます。
+        このサイトの記事は<strong style={strong}>MDX</strong>(文章の中に図などの部品を埋め込める書式)で書かれています。出力されたコードは、そのまま記事ファイル(<code>.mdx</code>)として保存・貼り付けて使います。中身を理解する必要はありません。
       </p>
     </div>
   </div>

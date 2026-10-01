@@ -1,12 +1,23 @@
-import type { Position } from '../poker/types';
-import type { TableBlockState } from './tableBlock';
+import type { Street } from '../poker/types';
+import type { HandInput, TableTiming } from '../poker/nlh';
 import type { RangeBlockState } from './rangeBlock';
 
 export type SectionId = 'preflop' | 'flop' | 'turn' | 'river' | 'result' | 'learning';
 
+export interface TableItem {
+  id: string;
+  kind: 'table';
+  street: Street;
+  timing: TableTiming;
+  showFolded: boolean;
+  showVillainCards: boolean;
+  caption: string;
+}
+
 export type SectionItem =
   | { id: string; kind: 'text'; markdown: string }
-  | { id: string; kind: 'table'; state: TableBlockState }
+  | TableItem
+  | { id: string; kind: 'actions'; street: Street }
   | { id: string; kind: 'range'; state: RangeBlockState };
 
 export interface Section {
@@ -15,14 +26,6 @@ export interface Section {
   enabled: boolean;
   headingText: string;
   items: SectionItem[];
-}
-
-export interface SituationData {
-  format: string;
-  stacks: string;
-  heroPosition: Position | '';
-  villainPosition: Position | '';
-  villainImage: string;
 }
 
 export interface Frontmatter {
@@ -36,8 +39,10 @@ export interface Frontmatter {
 }
 
 export interface ArticleDraft {
+  version: 2;
   frontmatter: Frontmatter;
-  situation: SituationData;
+  hand: HandInput;
+  villainImage: string;
   sections: Section[];
   updatedAt: number;
 }

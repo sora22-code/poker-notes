@@ -6,18 +6,18 @@ import ToolHelpBox from '../../components/tools/ToolHelpBox.astro';
 
 <BaseLayout
   title="ハンド図エディタ"
-  description="ポジション・スタック・ベット額・ボードを入力すると、記事に貼り付けられるPokerTableのMDXコードをその場で生成できるツール。"
+  description="NLHのハンドをアクションで入力すると、ポット・スタックを自動計算したテーブル図のMDXを生成するツール。"
 >
   <div class="max-w-6xl mx-auto px-4 py-10">
     <header class="mb-6">
       <h1 class="text-2xl sm:text-3xl font-extrabold mb-2" style="color: var(--color-text);">ハンド図エディタ</h1>
       <p class="text-base" style="color: var(--color-text-muted);">
-        ポジション・スタック・ベット額・ボードを入力すると、右側にテーブル図がリアルタイムで表示されます。「MDXをコピー」で記事にそのまま貼り付けられるコードが得られます。
+        ハンド設定とアクション(フォールド・コール・レイズなど)をボタンで入力すると、ポットとスタックが自動計算され、右側にテーブル図が表示されます。図1枚分やアクションライン1本分のMDXだけが欲しいときに使います。
       </p>
     </header>
 
     <ToolHelpBox />
 
-    <HandEditor client:load />
+    <HandEditor client:only="react" />
   </div>
 </BaseLayout>

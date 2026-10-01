@@ -1,6 +1,6 @@
 import type { Position } from '../../lib/poker/types';
 
-export type ActionKind = 'fold' | 'check' | 'call' | 'bet' | 'raise' | 'post';
+export type ActionKind = 'fold' | 'check' | 'call' | 'bet' | 'raise' | 'allin' | 'post';
 
 export interface ActionStep {
   position: Position;
@@ -19,6 +19,7 @@ const ACTION_LABEL: Record<ActionKind, string> = {
   call: 'コール',
   bet: 'ベット',
   raise: 'レイズ',
+  allin: 'オールイン',
   post: 'ポスト',
 };
 
@@ -28,6 +29,7 @@ const ACTION_COLOR: Record<ActionKind, string> = {
   call: 'var(--color-poker-call)',
   bet: 'var(--color-poker-bet)',
   raise: 'var(--color-poker-raise)',
+  allin: 'var(--color-poker-raise)',
   post: 'var(--color-text-muted)',
 };
 
@@ -46,7 +48,7 @@ export default function ActionLine({ street, actions }: ActionLineProps) {
           </span>
           <span className="text-sm font-medium" style={{ color: ACTION_COLOR[a.action] }}>
             {ACTION_LABEL[a.action]}
-            {typeof a.amount === 'number' ? ` ${a.amount.toLocaleString()}` : ''}
+            {typeof a.amount === 'number' ? ` ${a.amount.toLocaleString()}bb` : ''}
           </span>
           {i < actions.length - 1 && (
             <span className="mx-1" style={{ color: 'var(--color-border)' }}>

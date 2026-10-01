@@ -10,37 +10,37 @@ export interface RangePreset {
 export const RANGE_PRESETS: RangePreset[] = [
   {
     id: 'utg-open',
-    label: 'UTG オープンレンジ',
+    label: '6-max UTG オープン',
     color: 'var(--color-poker-raise)',
     hands: '22+, A9s+, KTs+, QTs+, JTs, T9s, 98s, ATo+, KJo+',
   },
   {
     id: 'hj-open',
-    label: 'HJ オープンレンジ',
+    label: '6-max HJ オープン',
     color: 'var(--color-tag-review)',
     hands: '22+, A7s+, K9s+, QTs+, J9s+, T8s+, 98s, 87s, ATo+, KTo+, QJo',
   },
   {
     id: 'co-open',
-    label: 'CO オープンレンジ',
+    label: '6-max CO オープン',
     color: 'var(--color-poker-bet)',
     hands: '22+, A2s+, K6s+, Q8s+, J8s+, T7s+, 97s+, 86s+, 76s, 65s, A8o+, KTo+, QTo+, JTo',
   },
   {
     id: 'btn-open',
-    label: 'BTN オープンレンジ',
+    label: '6-max BTN オープン',
     color: 'var(--color-poker-raise)',
     hands: '22+, A2s+, K2s+, Q4s+, J6s+, T7s+, 96s+, 86s+, 75s+, 65s, 54s, ATo+, KTo+, QTo+, JTo',
   },
   {
     id: 'sb-open',
-    label: 'SB オープンレンジ(レイズファースト)',
+    label: '6-max SB オープン(レイズファースト)',
     color: 'var(--color-poker-raise)',
     hands: '22+, A2s+, K5s+, Q7s+, J7s+, T7s+, 97s+, 87s, 76s, 65s, 54s, A5o+, KTo+, QTo+, JTo',
   },
   {
     id: 'bb-defend-vs-btn',
-    label: 'BB 防衛レンジ(vs BTNオープン)',
+    label: '6-max BB 防衛(vs BTN 2.5bb)',
     color: 'var(--color-poker-bet)',
     hands: '22-TT, A2s-AQs, K6s+, Q8s+, J8s+, T8s+, 97s+, 87s, 76s, 65s, 54s, ATo-AQo, KJo+, QJo',
   },

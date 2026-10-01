@@ -4,9 +4,11 @@ import PlayingCard from './PlayingCard';
 export interface SeatProps {
   player: PlayerSeat;
   showHoleCards?: boolean;
+  /** Tighter card for 9-handed tables so seats don't overlap. */
+  compact?: boolean;
 }
 
-export default function Seat({ player, showHoleCards = true }: SeatProps) {
+export default function Seat({ player, showHoleCards = true, compact = false }: SeatProps) {
   const ringStyle = player.isHero
     ? { boxShadow: `0 0 0 2px var(--poker-seat-hero-ring)` }
     : player.isActive
@@ -23,12 +25,12 @@ export default function Seat({ player, showHoleCards = true }: SeatProps) {
           className="text-[11px] font-semibold px-2 py-0.5 rounded-full"
           style={{ background: 'var(--poker-bet-badge-bg)', color: 'var(--poker-bet-badge-fg)' }}
         >
-          {player.bet.toLocaleString()}
+          {player.bet.toLocaleString()}bb
         </span>
       )}
 
       <div
-        className="rounded-xl border px-3 py-2 flex flex-col items-center gap-1.5 min-w-20"
+        className={`rounded-xl border flex flex-col items-center ${compact ? 'px-1.5 py-1 gap-1 min-w-14' : 'px-3 py-2 gap-1.5 min-w-20'}`}
         style={{
           background: 'var(--poker-seat-bg)',
           borderColor: 'var(--poker-seat-border)',
@@ -63,7 +65,7 @@ export default function Seat({ player, showHoleCards = true }: SeatProps) {
 
         {typeof player.stack === 'number' && (
           <span className="text-[10px]" style={{ color: 'var(--color-text-muted)' }}>
-            {player.stack.toLocaleString()}
+            {player.stack.toLocaleString()}bb
           </span>
         )}
       </div>
