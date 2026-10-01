@@ -1,5 +1,14 @@
 import { cardLabel, handCategory, isValidCard } from '../poker/cards';
-import { STREET_LABEL, computeHand, formatLabel, tableView, type HandResult } from '../poker/nlh';
+import {
+  STREET_LABEL,
+  computeHand,
+  effectiveStackOf,
+  formatLabel,
+  hasCustomStacks,
+  stackFor,
+  tableView,
+  type HandResult,
+} from '../poker/nlh';
 import { actionLineCode, pokerTableCode } from './codegen';
 import { isSectionVisible } from './draft';
 import { generateRangeCode } from './rangeBlock';
@@ -32,7 +41,7 @@ function serializeFrontmatter(draft: ArticleDraft): string {
     `  tableSize: ${setup.tableSize}`,
   ];
   if (setup.stakes.trim()) lines.push(`  stakes: ${yamlString(setup.stakes.trim())}`);
-  lines.push(`  effectiveStack: ${setup.effectiveStack}`, 'draft: false', '---');
+  lines.push(`  effectiveStack: ${effectiveStackOf(setup)}`, 'draft: false', '---');
   return lines.join('\n');
 }
 
@@ -40,10 +49,16 @@ function serializeFrontmatter(draft: ArticleDraft): string {
 export function situationLines(draft: ArticleDraft): string[] {
   const { setup } = draft.hand;
   const lines = [`ゲーム: ${formatLabel(setup)}`];
+  const effective = effectiveStackOf(setup);
+  // Spell out both stacks only when they differ; otherwise one number says it all.
+  const detail =
+    hasCustomStacks(setup) && setup.villainPosition
+      ? ` (Hero ${stackFor(setup, setup.heroPosition)}bb / Villain ${stackFor(setup, setup.villainPosition)}bb)`
+      : '';
   if (setup.startStreet === 'preflop') {
-    lines.push(`エフェクティブスタック: ${setup.effectiveStack}bb`);
+    lines.push(`エフェクティブスタック: ${effective}bb${detail}`);
   } else {
-    lines.push(`${STREET_LABEL[setup.startStreet]}開始時: ポット ${setup.startPot}bb / スタック ${setup.effectiveStack}bb`);
+    lines.push(`${STREET_LABEL[setup.startStreet]}開始時: ポット ${setup.startPot}bb / エフェクティブスタック ${effective}bb${detail}`);
   }
   lines.push(
     setup.villainPosition

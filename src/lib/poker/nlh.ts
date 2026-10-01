@@ -24,8 +24,10 @@ export interface HandSetup {
   tableSize: TableSize;
   /** e.g. "NL50". Free text so live/online/tournament naming all fit. */
   stakes: string;
-  /** Starting stack for everyone, in bb. When starting mid-hand, this is the stack left at that street. */
+  /** Default starting stack in bb. When starting mid-hand, this is the stack left at that street. */
   effectiveStack: number;
+  /** Per-seat starting stacks that differ from `effectiveStack`. Missing seats use the default. */
+  stacks?: Partial<Record<Position, number>>;
   /** Big blind ante in bb (posted by BB as dead money). 0 = no ante. */
   ante: number;
   /** Lets an author skip preflop and start at a given street with a fixed pot (hero vs villain only). */
@@ -193,9 +195,23 @@ function findNextToAct(state: TableState, after: Position | null): Position | nu
   return null;
 }
 
+export function stackFor(setup: HandSetup, position: Position): number {
+  const override = setup.stacks?.[position];
+  return Math.max(roundBB(typeof override === 'number' ? override : setup.effectiveStack), 0);
+}
+
+/** The stack that actually matters between hero and villain: the shorter of the two. */
+export function effectiveStackOf(setup: HandSetup): number {
+  const hero = stackFor(setup, setup.heroPosition);
+  return setup.villainPosition ? Math.min(hero, stackFor(setup, setup.villainPosition)) : hero;
+}
+
+export function hasCustomStacks(setup: HandSetup): boolean {
+  return SEATS[setup.tableSize].some((p) => typeof setup.stacks?.[p] === 'number');
+}
+
 export function initialState(setup: HandSetup): TableState {
   const positions = SEATS[setup.tableSize];
-  const stack = Math.max(roundBB(setup.effectiveStack), 0);
 
   if (setup.startStreet !== 'preflop') {
     const inHand = new Set<Position>([setup.heroPosition]);
@@ -204,7 +220,7 @@ export function initialState(setup: HandSetup): TableState {
       street: setup.startStreet,
       seats: positions.map((position) => ({
         position,
-        stack,
+        stack: stackFor(setup, position),
         committed: 0,
         folded: !inHand.has(position),
         allIn: false,
@@ -221,7 +237,13 @@ export function initialState(setup: HandSetup): TableState {
 
   const state: TableState = {
     street: 'preflop',
-    seats: positions.map((position) => ({ position, stack, committed: 0, folded: false, allIn: false })),
+    seats: positions.map((position) => ({
+      position,
+      stack: stackFor(setup, position),
+      committed: 0,
+      folded: false,
+      allIn: false,
+    })),
     pot: 0,
     currentBet: 0,
     minRaise: BIG_BLIND,
@@ -239,6 +261,23 @@ export function initialState(setup: HandSetup): TableState {
   state.currentBet = BIG_BLIND;
   state.toAct = findNextToAct(state, null);
   return state;
+}
+
+/**
+ * When betting on a street ends, the part of the biggest commitment nobody matched goes back to its owner
+ * (e.g. BTN shoves 100bb, a 60bb BB calls: 40bb returns). Without this the pot would be overstated.
+ */
+function returnUncalled(state: TableState) {
+  const sorted = [...state.seats].sort((a, b) => b.committed - a.committed);
+  const [top, second] = sorted;
+  if (!top || !second) return;
+  const excess = roundBB(top.committed - second.committed);
+  if (excess <= 0) return;
+  top.committed = roundBB(top.committed - excess);
+  top.stack = roundBB(top.stack + excess);
+  top.allIn = top.stack <= 0;
+  state.pot = roundBB(state.pot - excess);
+  state.currentBet = top.committed;
 }
 
 function nextStreetState(prev: TableState, street: Street): TableState {
@@ -323,6 +362,7 @@ export function applyAction(
 
   if (!next.acted.includes(seat.position)) next.acted.push(seat.position);
   next.toAct = findNextToAct(next, seat.position);
+  if (next.toAct === null) returnUncalled(next);
 
   return {
     state: next,
@@ -545,7 +585,11 @@ export function validateHand(input: HandInput, result: HandResult): string[] {
   if (setup.startStreet !== 'preflop' && !setup.villainPosition) {
     errors.push('フロップ以降から始める場合はVillainのポジションを指定してください');
   }
-  if (!(setup.effectiveStack > 0)) errors.push('エフェクティブスタックは0より大きくしてください');
+  if (!(setup.effectiveStack > 0)) errors.push('スタックは0より大きくしてください');
+  for (const p of seats) {
+    const s = setup.stacks?.[p];
+    if (typeof s === 'number' && !(s > 0)) errors.push(`${p} のスタックは0より大きくしてください`);
+  }
 
   errors.push(
     ...findCardErrors([

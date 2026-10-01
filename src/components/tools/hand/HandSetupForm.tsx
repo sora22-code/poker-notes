@@ -1,7 +1,15 @@
 import type { ReactNode } from 'react';
 import CardField from './CardField';
 import { fieldStyle, mutedTextStyle, panelStyle } from './styles';
-import { SEATS, STREET_LABEL, STREET_ORDER, type HandSetup, type TableSize } from '../../../lib/poker/nlh';
+import {
+  SEATS,
+  STREET_LABEL,
+  STREET_ORDER,
+  effectiveStackOf,
+  hasCustomStacks,
+  type HandSetup,
+  type TableSize,
+} from '../../../lib/poker/nlh';
 import type { Position, Street } from '../../../lib/poker/types';
 
 interface HandSetupFormProps {
@@ -58,14 +66,86 @@ function Field({ label, hint, children }: { label: string; hint?: string; childr
   );
 }
 
+function StackOverrides({ value, onChange }: { value: HandSetup; onChange: (p: Partial<HandSetup>) => void }) {
+  const seats =
+    value.startStreet === 'preflop'
+      ? SEATS[value.tableSize]
+      : SEATS[value.tableSize].filter((p) => p === value.heroPosition || p === value.villainPosition);
+  const custom = hasCustomStacks(value);
+
+  const setStack = (position: Position, raw: string) => {
+    const next = { ...(value.stacks ?? {}) };
+    const num = Number(raw);
+    if (raw.trim() === '' || num === value.effectiveStack) delete next[position];
+    else next[position] = num;
+    onChange({ stacks: next });
+  };
+
+  return (
+    <details open={custom} className="rounded-lg border" style={{ borderColor: 'var(--color-border)' }}>
+      <summary className="cursor-pointer select-none px-3 py-2 text-sm" style={{ color: 'var(--color-text)' }}>
+        プレイヤーごとのスタックを変える
+        <span className="ml-2 text-xs" style={mutedTextStyle}>
+          {custom ? `エフェクティブスタック ${effectiveStackOf(value)}bb` : '(全員同じなら不要)'}
+        </span>
+      </summary>
+      <div className="px-3 pb-3 space-y-2">
+        <p className="text-[11px]" style={mutedTextStyle}>
+          空欄の人は共通スタック({value.effectiveStack}bb)になります。HeroとVillainの短い方がエフェクティブスタックとして記事に書かれます。
+        </p>
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+          {seats.map((p) => {
+            const override = value.stacks?.[p];
+            const tag = p === value.heroPosition ? ' Hero' : p === value.villainPosition ? ' Villain' : '';
+            return (
+              <label key={p} className="flex items-center gap-1.5 text-xs">
+                <span className="w-16 shrink-0 font-semibold" style={{ color: 'var(--color-text)' }}>
+                  {p}
+                  <span style={{ color: 'var(--color-accent)' }}>{tag}</span>
+                </span>
+                <input
+                  type="number"
+                  min={0.5}
+                  step={0.5}
+                  value={typeof override === 'number' ? override : ''}
+                  placeholder={String(value.effectiveStack)}
+                  onChange={(e) => setStack(p, e.target.value)}
+                  className="w-20 text-xs rounded border px-2 py-1"
+                  style={fieldStyle}
+                  aria-label={`${p} のスタック(bb)`}
+                />
+                <span style={mutedTextStyle}>bb</span>
+              </label>
+            );
+          })}
+        </div>
+        {custom && (
+          <button
+            type="button"
+            onClick={() => onChange({ stacks: {} })}
+            className="text-[11px] font-semibold px-2.5 py-1 rounded-full border cursor-pointer"
+            style={{ borderColor: 'var(--color-border)', color: 'var(--color-text-muted)' }}
+          >
+            全員を共通スタックに戻す
+          </button>
+        )}
+      </div>
+    </details>
+  );
+}
+
 export default function HandSetupForm({ value, onChange, children }: HandSetupFormProps) {
   const patch = (p: Partial<HandSetup>) => onChange({ ...value, ...p });
   const seats = SEATS[value.tableSize];
 
   const changeTableSize = (tableSize: TableSize) => {
     const next = SEATS[tableSize];
+    const stacks = Object.fromEntries(
+      Object.entries(value.stacks ?? {}).filter(([p]) => next.includes(p as Position)),
+    ) as HandSetup['stacks'];
     patch({
       tableSize,
+      stacks,
       heroPosition: next.includes(value.heroPosition) ? value.heroPosition : 'BB',
       villainPosition:
         value.villainPosition && !next.includes(value.villainPosition) ? 'BTN' : value.villainPosition,
@@ -121,7 +201,7 @@ export default function HandSetupForm({ value, onChange, children }: HandSetupFo
             style={fieldStyle}
           />
         </Field>
-        <Field label={value.startStreet === 'preflop' ? 'エフェクティブスタック' : '開始時のスタック'} hint="bb">
+        <Field label={value.startStreet === 'preflop' ? 'スタック(全員共通)' : '開始時のスタック(共通)'} hint="bb">
           <input
             type="number"
             min={1}
@@ -247,6 +327,8 @@ export default function HandSetupForm({ value, onChange, children }: HandSetupFo
           </p>
         </div>
       </div>
+
+      <StackOverrides value={value} onChange={patch} />
 
       {children}
     </div>
