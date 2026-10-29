@@ -209,7 +209,7 @@ function PointRow({
           {pointHeadline(quiz, point)}
           {status && (
             <span
-              className="ml-2 text-[11px] px-1.5 py-0.5 rounded"
+              className="ml-2 inline-block whitespace-nowrap text-[11px] px-1.5 py-0.5 rounded"
               style={{
                 color: status === 'correct' ? 'var(--color-poker-call)' : 'var(--color-poker-raise)',
                 background: 'var(--color-surface-muted)',

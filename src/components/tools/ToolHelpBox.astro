@@ -10,6 +10,7 @@ const strong = 'color: var(--color-text);';
 
 <details
   open
+  id="tool-help"
   class="not-prose mb-6 rounded-xl border"
   style="background: var(--color-surface); border-color: var(--color-border);"
 >
@@ -88,3 +89,11 @@ const strong = 'color: var(--color-text);';
     </div>
   </div>
 </details>
+
+<script is:inline>
+  // On phones the guide would push the tool a full screen down; start it collapsed there.
+  (() => {
+    const guide = document.getElementById('tool-help');
+    if (guide && window.matchMedia('(max-width: 639px)').matches) guide.open = false;
+  })();
+</script>

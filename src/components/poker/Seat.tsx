@@ -30,7 +30,7 @@ export default function Seat({ player, showHoleCards = true, compact = false }: 
       )}
 
       <div
-        className={`rounded-xl border flex flex-col items-center ${compact ? 'px-1.5 py-1 gap-1 min-w-14' : 'px-3 py-2 gap-1.5 min-w-20'}`}
+        className={`rounded-xl border flex flex-col items-center ${compact ? 'px-1.5 py-1 gap-1 min-w-14' : 'px-1.5 py-1 gap-1 min-w-14 sm:px-3 sm:py-2 sm:gap-1.5 sm:min-w-20'}`}
         style={{
           background: 'var(--poker-seat-bg)',
           borderColor: 'var(--poker-seat-border)',
@@ -58,7 +58,7 @@ export default function Seat({ player, showHoleCards = true, compact = false }: 
             ) : (
               player.cards.map((_, i) => <PlayingCard key={i} faceDown size="sm" />)
             )
-          ) : (
+          ) : compact ? null : (
             <div className="h-9" />
           )}
         </div>

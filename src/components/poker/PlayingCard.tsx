@@ -16,7 +16,7 @@ export interface PlayingCardProps {
 
 const SIZE_CLASSES: Record<string, string> = {
   sm: 'w-6 h-9 text-[10px]',
-  md: 'w-9 h-13 text-sm',
+  md: 'w-6 h-9 text-[10px] min-[360px]:w-7 min-[360px]:h-10 min-[360px]:text-xs sm:w-9 sm:h-13 sm:text-sm',
   lg: 'w-12 h-17 text-base',
 };
 

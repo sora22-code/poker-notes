@@ -76,12 +76,14 @@ export default function TableViewControls({ input, result, value, onChange, stre
             </select>
           </label>
         )}
-        <label className="flex items-center gap-2 text-sm">
-          <span style={mutedTextStyle}>表示タイミング</span>
+        <label className="flex items-center gap-2 text-sm min-w-0 max-w-full">
+          <span className="shrink-0 whitespace-nowrap" style={mutedTextStyle}>
+            表示タイミング
+          </span>
           <select
             value={encodeTiming(value.timing)}
             onChange={(e) => patch({ timing: decodeTiming(e.target.value) })}
-            className="text-sm rounded border px-2 py-1 max-w-64"
+            className="text-sm rounded border px-2 py-1 min-w-0 flex-1 sm:flex-none sm:max-w-64"
             style={fieldStyle}
           >
             {timingOptions(result, value.street).map((o) => (

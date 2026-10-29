@@ -142,12 +142,12 @@ export default function HandEditor() {
                   className={tabButton}
                   style={output === t ? primaryButtonStyle : secondaryButtonStyle}
                 >
-                  {t === 'table' ? 'テーブル図のMDX' : `アクションライン(${STREET_LABEL[street]})のMDX`}
+                  {t === 'table' ? 'テーブル図' : `アクションライン(${STREET_LABEL[street]})`}
                 </button>
               ))}
             </div>
             <button type="button" onClick={handleCopy} className={tabButton} style={primaryButtonStyle}>
-              {copied ? 'コピーしました' : 'コピー'}
+              {copied ? 'コピーしました' : 'MDXをコピー'}
             </button>
           </div>
           <pre

@@ -93,12 +93,12 @@ function StackOverrides({ value, onChange }: { value: HandSetup; onChange: (p: P
         <p className="text-[11px]" style={mutedTextStyle}>
           空欄の人は共通スタック({value.effectiveStack}bb)になります。HeroとVillainの短い方がエフェクティブスタックとして記事に書かれます。
         </p>
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+        <div className="grid grid-cols-1 min-[360px]:grid-cols-2 sm:grid-cols-3 gap-2">
           {seats.map((p) => {
             const override = value.stacks?.[p];
             const tag = p === value.heroPosition ? ' Hero' : p === value.villainPosition ? ' Villain' : '';
             return (
-              <label key={p} className="flex items-center gap-1.5 text-xs">
+              <label key={p} className="flex items-center gap-1.5 text-xs min-w-0">
                 <span className="w-16 shrink-0 font-semibold" style={{ color: 'var(--color-text)' }}>
                   {p}
                   <span style={{ color: 'var(--color-accent)' }}>{tag}</span>
@@ -110,7 +110,7 @@ function StackOverrides({ value, onChange }: { value: HandSetup; onChange: (p: P
                   value={typeof override === 'number' ? override : ''}
                   placeholder={String(value.effectiveStack)}
                   onChange={(e) => setStack(p, e.target.value)}
-                  className="w-20 text-xs rounded border px-2 py-1"
+                  className="min-w-0 flex-1 max-w-32 sm:flex-none sm:w-20 text-xs rounded border px-2 py-1"
                   style={fieldStyle}
                   aria-label={`${p} のスタック(bb)`}
                 />
