@@ -20,8 +20,9 @@ const STREET_LABEL: Record<Street, string> = {
 
 function seatPosition(index: number, total: number) {
   const angleStep = (2 * Math.PI) / total;
-  // index 0 sits at the bottom (90deg / PI/2), seats fan out clockwise from there.
-  const theta = Math.PI / 2 - index * angleStep;
+  // Index 0 (hero) sits at the bottom; the rest follow in action order going clockwise, like a real table:
+  // the next player to act is on hero's left (screen left), the one before (e.g. SB next to BB) on hero's right.
+  const theta = Math.PI / 2 + index * angleStep;
   const rx = 43;
   const ry = 36;
   const x = 50 + rx * Math.cos(theta);
