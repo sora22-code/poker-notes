@@ -54,10 +54,14 @@ function seatGeometry(index: number, total: number) {
   const side: Side = index === 0 ? 'bottom' : cos > 0.3 ? 'right' : cos < -0.3 || sin < 0 ? 'left' : 'bottom';
   // Chips sit between the seat and the board, pulled in further horizontally so they clear the side seats.
   // Hero's go beside the avatar instead: above it is where the "どうする？" bubble appears.
+  // The top seat's chips go beside it too (its bubble is on the right), clear of the upper side seats' bubbles.
+  const top = index !== 0 && Math.abs(cos) < 0.3 && sin < 0;
   const chips =
     index === 0
       ? { left: 'calc(50% - 66px)', top: 'calc(50% + var(--seat-ry))' }
-      : {
+      : top
+        ? { left: `calc(50% + ${cos.toFixed(4)} * var(--seat-rx) - var(--top-chip))`, top: at(1, 1).top }
+        : {
           left: `calc(50% + ${cos.toFixed(4)} * var(--chip-x) * var(--seat-rx))`,
           top: `calc(50% + ${sin.toFixed(4)} * var(--chip-y) * var(--seat-ry))`,
         };
@@ -90,8 +94,8 @@ function Avatar({ hero }: { hero: boolean }) {
 function Bubble({ kind, side, low }: { kind: SeatActionKind; side: Side; low: boolean }) {
   const tone = ACTION_TONE[kind];
   const place: Record<Side, string> = {
-    left: `left-[85%] ${low ? 'top-[45%]' : 'top-0'}`,
-    right: `right-[85%] ${low ? 'top-[45%]' : 'top-0'}`,
+    left: `left-[85%] ${low ? 'top-[36%] @lg:top-[45%]' : 'top-0'}`,
+    right: `right-[85%] ${low ? 'top-[36%] @lg:top-[45%]' : 'top-0'}`,
     top: 'top-[92%] left-1/2 -translate-x-1/2',
     bottom: 'bottom-[92%] left-1/2 -translate-x-1/2',
   };
@@ -103,6 +107,28 @@ function Bubble({ kind, side, low }: { kind: SeatActionKind; side: Side; low: bo
       style={{ background: tone.bg, color: tone.fg, borderColor: tone.border }}
     >
       {ACTION_LABEL[kind]}
+    </span>
+  );
+}
+
+/**
+ * 9-handed tables have no room for side bubbles and loose chips, so the action and the chips in front of the
+ * player share one small tag on top of the avatar, inside the seat's own footprint.
+ */
+function CompactTag({ kind, bet }: { kind?: SeatActionKind; bet?: number }) {
+  const tone = kind ? ACTION_TONE[kind] : ACTION_TONE.check;
+  // No "bb" suffix: the tag has to stay about as wide as the seat (the pot in the middle still says bb).
+  const amount = typeof bet === 'number' && bet > 0 ? String(bet) : '';
+  const text = kind ? `${ACTION_LABEL[kind]}${amount && kind !== 'fold' ? ` ${amount}` : ''}` : amount;
+  if (!text) return null;
+  return (
+    <span
+      key={text}
+      data-bubble
+      className="poker-pop absolute z-20 -top-2.5 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full border px-1.5 text-[9px] @md:text-[11px] font-bold leading-4 shadow-md"
+      style={{ background: tone.bg, color: tone.fg, borderColor: tone.border }}
+    >
+      {text}
     </span>
   );
 }
@@ -153,10 +179,16 @@ function SeatView({ player, side, low, compact }: { player: ReplaySeat; side: Si
           <Avatar hero={hero} />
         </div>
         {hero && player.cards && player.cards.length > 0 && (
-          <div className="absolute left-[92%] bottom-[-6px] flex z-10 origin-bottom-left scale-[0.8] @min-[300px]:scale-100">
+          <div
+            className={`absolute bottom-[-6px] flex z-10 ${
+              compact
+                ? 'left-[50%] origin-bottom-left @max-[340px]:scale-[0.8]'
+                : 'left-[92%] origin-bottom-left scale-[0.8] @min-[300px]:scale-100'
+            }`}
+          >
             {player.cards.map((c, i) => (
-              <div key={i} style={{ transform: `rotate(${i ? 8 : -4}deg)`, marginLeft: i ? -10 : 0 }}>
-                <PlayingCard card={c} size="lg" />
+              <div key={i} style={{ transform: `rotate(${i ? 8 : -4}deg)`, marginLeft: i ? (compact ? -4 : -10) : 0 }}>
+                <PlayingCard card={c} size={compact ? 'md' : 'lg'} />
               </div>
             ))}
           </div>
@@ -170,7 +202,11 @@ function SeatView({ player, side, low, compact }: { player: ReplaySeat; side: Si
             ))}
           </div>
         )}
-        {player.lastAction && <Bubble kind={player.lastAction} side={side} low={low} />}
+        {compact ? (
+          <CompactTag kind={player.lastAction} bet={player.bet} />
+        ) : (
+          player.lastAction && <Bubble kind={player.lastAction} side={side} low={low} />
+        )}
       </div>
       <div
         className="-mt-1.5 relative z-10 rounded-md overflow-hidden text-center leading-tight min-w-12 @md:min-w-16 shadow"
@@ -180,7 +216,7 @@ function SeatView({ player, side, low, compact }: { player: ReplaySeat; side: Si
           {player.position}
         </div>
         <div className="px-1.5 text-[10px] @md:text-xs font-semibold tabular-nums" style={{ background: 'var(--replay-plate-bottom)', color: 'var(--replay-plate-bottom-fg)' }}>
-          {typeof player.stack === 'number' ? (player.stack === 0 && !player.folded ? 'オールイン' : `${player.stack}bb`) : '—'}
+          {typeof player.stack === 'number' ? (`${player.stack}bb`) : '—'}
         </div>
       </div>
     </div>
@@ -197,11 +233,11 @@ export default function ReplayTable({ players, board, pot, meta, asking = false 
     <div
       className={`relative w-full ${
         compact
-          ? 'aspect-[2/3] [--seat-rx:39%] [--seat-ry:40%]'
+          ? 'aspect-[2/3] [--seat-rx:39%] [--seat-ry:40%] @max-[300px]:[--seat-rx:36%]'
           : ordered.length > 3
             ? 'aspect-[3/4] [--seat-rx:38%] [--seat-ry:39%] @max-[300px]:aspect-[2/3]'
             : 'aspect-[4/5] [--seat-rx:38%] [--seat-ry:39%]'
-      } [--chip-x:0.45] [--chip-y:0.62] @max-[300px]:[--chip-x:0.3] @lg:[--chip-x:0.6] @xl:[--chip-x:0.66] @lg:aspect-[16/11] @lg:[--seat-rx:42%] @lg:[--seat-ry:38%]`}
+      } [--chip-x:0.45] [--chip-y:0.62] [--top-chip:62px] @md:[--top-chip:80px] @max-[300px]:[--chip-x:0.3] @lg:[--chip-x:0.6] @xl:[--chip-x:0.66] @lg:aspect-[16/11] @lg:[--seat-rx:42%] @lg:[--seat-ry:38%]`}
     >
       {/* Rail + felt. */}
       <div
@@ -250,7 +286,7 @@ export default function ReplayTable({ players, board, pot, meta, asking = false 
       </div>
 
       {ordered.map((p, i) =>
-        typeof p.bet === 'number' && p.bet > 0 ? (
+        !compact && typeof p.bet === 'number' && p.bet > 0 ? (
           <span
             key={`chips-${p.position}`}
             data-chips
@@ -273,14 +309,15 @@ export default function ReplayTable({ players, board, pot, meta, asking = false 
           {p.isHero && asking && (
             <span
               data-bubble
-              className="poker-pop absolute bottom-[calc(100%+6px)] left-1/2 -translate-x-1/2 z-30 whitespace-nowrap rounded-xl px-3 py-1 text-sm @md:text-base font-extrabold shadow-lg"
+              data-asking
+              className={`poker-pop absolute ${compact ? 'bottom-[calc(100%-4px)]' : 'bottom-[calc(100%+6px)]'} left-1/2 -translate-x-1/2 z-30 whitespace-nowrap rounded-xl px-3 py-1 text-sm @max-[300px]:px-2 @max-[300px]:py-0.5 @max-[300px]:text-xs @md:text-base font-extrabold shadow-lg`}
               style={{ background: '#ffffff', color: '#0f172a' }}
             >
               どうする？
               <span aria-hidden className="absolute left-1/2 -bottom-1 w-2.5 h-2.5 -translate-x-1/2 rotate-45" style={{ background: '#ffffff' }} />
             </span>
           )}
-          <SeatView player={asking && p.isHero ? { ...p, lastAction: undefined } : p} side={geometry[i].side} low={geometry[i].low} compact={compact} />
+          <SeatView player={asking && p.isHero ? { ...p, lastAction: undefined, bet: undefined } : p} side={geometry[i].side} low={geometry[i].low} compact={compact} />
         </div>
       ))}
     </div>
