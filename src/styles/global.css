@@ -57,6 +57,37 @@
   --card-back-bg: #2563eb;
   --card-border: #cbd5e1;
 
+  /* replayer / quiz "game table" (same in both themes: it always sits on its own dark panel) */
+  --replay-bg-1: #1f3f78;
+  --replay-bg-2: #0e1c3a;
+  --replay-rail: #ece4d3;
+  --replay-rail-edge: #c8bca3;
+  --replay-felt-1: #2f64b0;
+  --replay-felt-2: #1a3d7a;
+  --replay-felt-line: rgba(255, 255, 255, 0.16);
+  --replay-felt-text: rgba(255, 255, 255, 0.55);
+  --replay-text: #e2e8f0;
+  --replay-text-muted: #9fb3d4;
+  --replay-avatar: #c7d2e3;
+  --replay-avatar-fg: #475569;
+  --replay-hero-avatar: #2563eb;
+  --replay-hero: #60a5fa;
+  --replay-active: #fbbf24;
+  --replay-plate-top: #ffffff;
+  --replay-plate-top-fg: #0f172a;
+  --replay-plate-bottom: #0b1220;
+  --replay-plate-bottom-fg: #e2e8f0;
+  --replay-bubble-bg: #13284d;
+  --replay-bubble-fg: #cbd5e1;
+  --replay-bubble-border: #4f6fa3;
+  --replay-call: #16a34a;
+  --replay-raise: #ea580c;
+  --replay-allin: #7c3aed;
+  --replay-fold-btn: #2f5b9a;
+  --replay-check-btn: #475569;
+  --replay-chip: #f59e0b;
+  --replay-chip-pill: rgba(8, 15, 35, 0.6);
+
   /* code blocks */
   --code-bg: #1e293b;
   --code-tab-bg: #0f172a;
@@ -393,8 +424,23 @@ body {
   animation: poker-pop 0.25s ease-out;
 }
 
+@keyframes replay-pulse {
+  0%,
+  100% {
+    filter: drop-shadow(0 0 0 rgba(251, 191, 36, 0));
+  }
+  50% {
+    filter: drop-shadow(0 0 8px rgba(251, 191, 36, 0.9));
+  }
+}
+
+.replay-active-ring {
+  animation: replay-pulse 1.4s ease-in-out infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .poker-pop {
+  .poker-pop,
+  .replay-active-ring {
     animation: none;
   }
 }
