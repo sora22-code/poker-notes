@@ -1,6 +1,7 @@
 import { handCategory, isValidCard } from '../poker/cards';
 import { preflopPotType, validateHand, type HandInput, type HandResult } from '../poker/nlh';
 import { parseTags } from './serialize';
+import { buildQuizFromDraft } from '../quiz/fromDraft';
 import type { ArticleDraft } from './types';
 
 const POT_SLUG: Record<string, string> = {
@@ -50,6 +51,10 @@ export function checkDraft(draft: ArticleDraft, result: HandResult): DraftChecks
   if (!fm.description.trim()) warnings.push('説明が未入力です（記事一覧とSNSシェア時に表示されます）');
   if (!fm.slug.trim()) warnings.push('スラッグが未入力です（「ハンドから生成」で自動入力できます）');
   if (draft.hand.setup.heroCards.filter(isValidCard).length < 2) warnings.push('Heroのハンドが未入力です');
+  // Only count questions that still match a hero decision; stale settings from an edited hand don't matter.
+  const quiz = draft.quiz.placement === 'none' ? null : buildQuizFromDraft(draft, result);
+  const missing = quiz?.points.filter((p) => !p.explanation).length ?? 0;
+  if (missing > 0) warnings.push(`解説が未入力の問題が${missing}問あります`);
   const hasProse = draft.sections.some((s) => s.items.some((i) => i.kind === 'text' && i.markdown.trim()));
   if (!hasProse) warnings.push('本文がまだありません');
   return { errors, warnings };

@@ -18,6 +18,9 @@ import HandRangeChart from '../../components/poker/HandRangeChart';
 import EquityCalculator from '../../components/poker/EquityCalculator';
 import ActionLine from '../../components/poker/ActionLine';
 import Message from '../../components/article/Message.astro';
+import HandReplayer from '../../components/poker/HandReplayer';
+
+export const handQuiz = {"kind": "hand-quiz", "version": 1, "id": "btn-3bet-pot-river-bluffcatch-kq", "title": "3ベットポットのリバーオールイン、KQsでのブラフキャッチ判断", "source": {"title": "3ベットポットのリバーオールイン、KQsでのブラフキャッチ判断", "slug": "btn-3bet-pot-river-bluffcatch-kq"}, "hand": {"setup": {"format": "cash", "tableSize": 6, "stakes": "NL100", "effectiveStack": 100, "ante": 0, "startStreet": "preflop", "startPot": 5.5, "heroPosition": "BTN", "villainPosition": "BB", "heroCards": ["Ks", "Qs"], "villainCards": ["", ""]}, "boards": {"flop": ["Qh", "8c", "4d"], "turn": "Th", "river": "2s"}, "actions": {"preflop": [{"position": "UTG", "kind": "fold"}, {"position": "HJ", "kind": "fold"}, {"position": "CO", "kind": "fold"}, {"position": "BTN", "kind": "raise", "to": 2.5}, {"position": "SB", "kind": "fold"}, {"position": "BB", "kind": "raise", "to": 9}, {"position": "BTN", "kind": "call"}], "flop": [{"position": "BB", "kind": "bet", "to": 12}, {"position": "BTN", "kind": "call"}], "turn": [{"position": "BB", "kind": "bet", "to": 30}, {"position": "BTN", "kind": "call"}], "river": [{"position": "BB", "kind": "bet", "to": 49}, {"position": "BTN", "kind": "call"}]}}, "points": [{"id": "preflop-6", "street": "preflop", "actionIndex": 6, "correct": ["call"], "explanation": "KQsはフォールドするには強すぎ、4ベットするとBBのレンジの上位（QQ+・AK）にしか続けてもらえず不利になりがちです。\n\nコールすれば、ポジションを取ったままフロップを見られます。トップペアやフラッシュドロー・ストレートドローを作りやすいKQsのプレイアブルさを活かせるコールが基本です。"}, {"id": "turn-1", "street": "turn", "actionIndex": 1, "correct": ["call"], "explanation": "コール額30bbで最終ポットは102.5bb、必要な勝率は約29%です。クイーンのトップペア・キッカーKは、BBのバレルレンジ（オーバーペア・AQ・セット・ドロー）に対して十分戦えます。\n\n残りスタックは49bbなので、レイズしてもBBの弱いハンドは降り、強いハンドだけが続けてきます。コールでリバーに進むのが自然です。"}, {"id": "river-1", "street": "river", "actionIndex": 1, "correct": ["call"], "explanation": "コール額49bbで最終ポットは200.5bb、必要な勝率は約24%。4回に1回勝てれば元が取れる価格です。\n\nBBのオールインレンジにはセットやストレートだけでなく、AK・AJのような何も完成しなかったブラフも含まれます。トップペア・キッカーKは降りずにコールが正解です（実際にBBはAJのブラフでした）。"}]};
 
 3ベットポットでポストフロップを深く進めると、リバーで大きなオールインに直面してハンド単体の強さだけでは判断しづらい場面に何度も出会います。今回はBTNオープン→BB3ベット→コールという典型的な3ベットポットで、K♠Q♠を持ってリバーのオールインをコールするかどうかを、感覚ではなく数字で判断したハンドを振り返ります。
 
@@ -31,14 +34,18 @@ import Message from '../../components/article/Message.astro';
 <PokerTable
   client:visible
   street="preflop"
-  pot={18}
+  pot={12}
   players={[
-    { position: 'BTN', stack: 91, isHero: true, cards: ['Ks', 'Qs'] },
-    { position: 'SB', stack: 100, folded: true },
-    { position: 'BB', stack: 91, bet: 9, isActive: true },
+    { position: 'BTN', stack: 97.5, bet: 2.5, isHero: true, isActive: true, cards: ['Ks', 'Qs'] },
+    { position: 'SB', stack: 99.5, bet: 0.5, folded: true },
+    { position: 'BB', stack: 91, bet: 9 },
   ]}
-  caption="BTN が 2.5bb オープン、BB が 9bb に3ベット。Hero(BTN) は K♠Q♠ でコール。"
+  caption="BTN が 2.5bb オープン、BB が 9bb に3ベット。Hero(BTN) は K♠Q♠ でコールするか判断する。"
 />
+
+まずは自分ならどうするか、ハンドを再生しながら考えてみてください（解説はこの下に続きます）。
+
+<HandReplayer client:load quiz={handQuiz} />
 
 ## プリフロップ: 3ベットへのコール
 
@@ -73,7 +80,7 @@ KQsはポジションを取れる3ベットポットにおいて、フォール�
 <PokerTable
   client:visible
   street="river"
-  pot={151}
+  pot={151.5}
   board={['Qh', '8c', '4d', 'Th', '2s']}
   players={[
     { position: 'BTN', stack: 49, isHero: true, cards: ['Ks', 'Qs'] },
@@ -82,13 +89,13 @@ KQsはポジションを取れる3ベットポットにおいて、フォール�
   caption="Q-8-4-T-2。Hero はクイーンのトップペア(キッカーK)。BB が 49bb オールイン。"
 />
 
-まずポットオッズを整理します。オールイン前のポットは102bb、BBのベットが49bbなので、コール後の最終ポットは 102 + 49 + 49 = 200bb。Heroが49bbをコールして収支トントンになるために必要な勝率は次の通りです。
+まずポットオッズを整理します。オールイン前のポットは102.5bb(SBのデッドマネー0.5bbを含む)、BBのベットが49bbなので、コール後の最終ポットは 102.5 + 49 + 49 = 200.5bb。Heroが49bbをコールして収支トントンになるために必要な勝率は次の通りです。
 
 ```
 必要勝率 = コール額 ÷ 最終ポット
-        = 49 ÷ (102 + 49 + 49)
-        = 49 ÷ 200
-        = 24.5%
+        = 49 ÷ (102.5 + 49 + 49)
+        = 49 ÷ 200.5
+        ≈ 24.4%
 ```
 
 <Message type="info">
@@ -124,7 +131,7 @@ KQsはポジションを取れる3ベットポットにおいて、フォール�
   board={['Qh', '8c', '4d', 'Th', '2s']}
 />
 
-計算上の勝率は必要勝率24.5%を大きく上回ります。KQsのキッカーKがAK/AJ/KJのようなブラフ側のハンドを部分的にブロックしている(相手がそれらのハンドを持っている確率をわずかに下げている)ことに加え、このレンジ設定ではバリューよりブラフのコンボ数の方が多く、ポラライズドレンジ特有の「ブラフの比率が高くなりやすい」性質も反映されています。
+計算上の勝率は必要勝率24.4%を大きく上回ります。KQsのキッカーKがAK/AJ/KJのようなブラフ側のハンドを部分的にブロックしている(相手がそれらのハンドを持っている確率をわずかに下げている)ことに加え、このレンジ設定ではバリューよりブラフのコンボ数の方が多く、ポラライズドレンジ特有の「ブラフの比率が高くなりやすい」性質も反映されています。
 
 <Message type="alert">
 ここで重要なのは「感覚的に怖いから降りる」ではなく、必要勝率とレンジ全体に対する実際の勝率を数字で比較してから判断することです。今回のようにポットが大きく育った3ベットポットでは、直感よりもコールが正しくなるケースが多いという点は覚えておく価値があります。

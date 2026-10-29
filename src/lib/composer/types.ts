@@ -38,11 +38,26 @@ export interface Frontmatter {
   publishedAt: string;
 }
 
+/** Author settings for one hero decision, keyed by point id (`${street}-${actionIndex}`). */
+export interface QuizPointDraft {
+  enabled: boolean;
+  correct: string[];
+  prompt: string;
+  explanation: string;
+}
+
+export interface QuizDraft {
+  /** Where the interactive replayer goes: right after 状況設定 (before spoilers), at the end, or nowhere. */
+  placement: 'top' | 'bottom' | 'none';
+  points: Record<string, QuizPointDraft>;
+}
+
 export interface ArticleDraft {
   version: 2;
   frontmatter: Frontmatter;
   hand: HandInput;
   villainImage: string;
   sections: Section[];
+  quiz: QuizDraft;
   updatedAt: number;
 }

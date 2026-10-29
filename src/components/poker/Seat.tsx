@@ -18,7 +18,7 @@ export default function Seat({ player, showHoleCards = true, compact = false }: 
   return (
     <div
       className="flex flex-col items-center gap-1"
-      style={{ opacity: player.folded ? 'var(--poker-seat-fold-opacity)' : 1 }}
+      style={{ opacity: player.folded ? 'var(--poker-seat-fold-opacity)' : 1, transition: 'opacity 0.3s ease' }}
     >
       {typeof player.bet === 'number' && player.bet > 0 && (
         <span

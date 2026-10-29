@@ -51,7 +51,8 @@ src/
 1. ハンド設定: キャッシュ/トーナメント、6-max/9-max、ステークス、スタック(全員共通+プレイヤーごとの上書き)、Hero/Villainのポジションとハンド
 2. 各ストリート: ボードを入れ、アクションをボタンで入力(「フォールドで進める」「2.5x」「50%」などのショートカットあり)しながら本文を書く。アクションライン・テーブル図・状況設定はアクションから自動生成され、ポットとスタックも自動計算される
 3. 記事情報: タイトル・説明・スラッグ(ハンドから自動生成可)・タグ(ハンドから提案)
-4. 「.mdxをダウンロード」したファイルを `src/content/articles/` に置いてcommit
+4. (任意) クイズ: Heroの判断ごとに「問題にする」をオンにし、正解の選択肢と解説を入れる。記事にハンドの再生プレイヤー(`HandReplayer`)が入り、判断の直前で止まって「この時どうする？」が出る
+5. 「.mdxをダウンロード」したファイルを `src/content/articles/` に置いてcommit
 
 金額はすべてbb単位で、SB 0.5bb / BB 1bb(トーナメントはBBアンティも)が自動で置かれます。ベット/レイズ額は「そのストリートでその人が出す合計」です。入力内容はブラウザに自動保存されます。図1枚分のMDXだけ欲しい場合は `/tools/hand-editor` を使います。
 
@@ -119,6 +120,23 @@ draft: false             # true にすると一覧・ビルド対象から除外
 ```
 
 `players[].position` は `UTG | UTG1 | UTG2 | LJ | HJ | CO | BTN | SB | BB`。`isHero` を付けたプレイヤーがテーブル下部中央に自動配置されます。 金額(stack/bet/pot)はbb単位で、表示にも「bb」が付きます。7人以上のときは座席が自動でコンパクト表示になります。
+
+### HandReplayer（ハンド再生 + クイズ）
+
+ハンドを1アクションずつ自動再生し、問題に設定したHeroの判断の直前で止まって選択肢を出します。データは記事内の `export const` に置き、`/quiz/`(問題集)がビルド時に全記事から自動収集します。
+
+```mdx
+export const handQuiz = { kind: 'hand-quiz', version: 1, id: 'bb-vs-btn-ajo-srp', title: '…', hand: {…}, points: [
+  { id: 'preflop-5', street: 'preflop', actionIndex: 5, correct: ['call'], explanation: '…' },
+] };
+
+<HandReplayer client:load quiz={handQuiz} />
+```
+
+- `points[].id` は `ストリート-アクション番号`。`correct` は選択肢ID(`fold` / `check` / `call` / `bet:2.8` / `raise:7.5` / `allin`)で、複数指定可
+- 手書きせず記事コンポーザーの「クイズ」欄から生成するのが前提です
+- 読者の回答はブラウザ(localStorage)に保存され、最後に間違えた問題が問題集の「間違えた問題」に並びます。正解すると一覧から外れます
+- 共有リンクは問題と解説をURL(`/quiz/#set=…`)に圧縮して埋め込むため、サーバーなしで誰でも開けます
 
 ### ActionLine
 

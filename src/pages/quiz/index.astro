@@ -1,0 +1,24 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import QuizHub from '../../components/quiz/QuizHub';
+import { collectSiteQuizzes } from '../../lib/quiz/collect';
+
+const modules = import.meta.glob('../../content/articles/*.mdx', { eager: true });
+const quizzes = collectSiteQuizzes(modules as Parameters<typeof collectSiteQuizzes>[0]);
+---
+
+<BaseLayout
+  title="問題集"
+  description="記事のハンドから出題される「この時どうする？」の問題集。間違えた問題を解き直したり、リンクで共有したりできます。"
+>
+  <div class="max-w-3xl mx-auto px-4 py-10">
+    <header class="mb-6">
+      <h1 class="text-2xl sm:text-3xl font-extrabold mb-2" style="color: var(--color-text);">問題集</h1>
+      <p class="text-base" style="color: var(--color-text-muted);">
+        記事のハンドの「この時どうする？」を解けます。間違えた問題はこのブラウザに保存され、正解するまで解き直せます。選んだ問題はリンクにして人に送れます。
+      </p>
+    </header>
+
+    <QuizHub client:only="react" siteQuizzes={quizzes} />
+  </div>
+</BaseLayout>

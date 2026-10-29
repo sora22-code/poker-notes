@@ -376,3 +376,25 @@ body {
   display: block;
   color: var(--color-text);
 }
+
+/* replayer / quiz motion */
+@keyframes poker-pop {
+  from {
+    opacity: 0;
+    transform: translateY(4px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.poker-pop {
+  animation: poker-pop 0.25s ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .poker-pop {
+    animation: none;
+  }
+}

@@ -12,6 +12,7 @@ import {
 import { actionLineCode, pokerTableCode } from './codegen';
 import { isSectionVisible } from './draft';
 import { generateRangeCode } from './rangeBlock';
+import { buildQuizFromDraft } from '../quiz/fromDraft';
 import type { ArticleDraft, SectionItem } from './types';
 
 function yamlString(s: string): string {
@@ -105,8 +106,15 @@ export function collectImports(draft: ArticleDraft, result: HandResult): string[
   return imports;
 }
 
+const REPLAYER_TAG = '<HandReplayer client:load quiz={handQuiz} />';
+const REPLAYER_INTRO = 'まずは自分ならどうするか、ハンドを再生しながら考えてみてください（解説はこの下に続きます）。';
+
 export function serializeDraft(draft: ArticleDraft, result: HandResult = computeHand(draft.hand)): string {
-  const parts: string[] = [`## 状況設定\n\n${situationLines(draft).map((l) => `- ${l}`).join('\n')}`];
+  const quiz = draft.quiz.placement === 'none' ? null : buildQuizFromDraft(draft, result);
+  const situation = `## 状況設定\n\n${situationLines(draft).map((l) => `- ${l}`).join('\n')}`;
+  const parts: string[] = [
+    quiz && draft.quiz.placement === 'top' ? `${situation}\n\n${REPLAYER_INTRO}\n\n${REPLAYER_TAG}` : situation,
+  ];
 
   for (const section of draft.sections) {
     if (!isSectionVisible(section, result)) continue;
@@ -117,9 +125,16 @@ export function serializeDraft(draft: ArticleDraft, result: HandResult = compute
     parts.push(body ? `## ${section.headingText}\n\n${body}` : `## ${section.headingText}`);
   }
 
+  if (quiz && draft.quiz.placement === 'bottom') {
+    parts.push(`## クイズで振り返る\n\nこのハンドの判断ポイントを、ハンドを再生しながら解いてみてください。\n\n${REPLAYER_TAG}`);
+  }
+
   const imports = collectImports(draft, result);
+  if (quiz) imports.push("import HandReplayer from '../../components/poker/HandReplayer';");
+  // One line of JSON: a blank line inside an MDX export would end the ESM block early.
+  const exportsBlock = quiz ? `export const handQuiz = ${JSON.stringify(quiz)};\n\n` : '';
   const importsBlock = imports.length > 0 ? `${imports.join('\n')}\n\n` : '';
-  return `${serializeFrontmatter(draft)}\n\n${importsBlock}${parts.join('\n\n')}\n`;
+  return `${serializeFrontmatter(draft)}\n\n${importsBlock}${exportsBlock}${parts.join('\n\n')}\n`;
 }
 
 export function suggestFilename(draft: ArticleDraft): string {

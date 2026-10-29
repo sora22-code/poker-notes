@@ -18,7 +18,9 @@ export function loadDraft(): ArticleDraft | null {
     const raw = window.localStorage.getItem(STORAGE_KEY);
     if (!raw) return null;
     const parsed = JSON.parse(raw) as ArticleDraft;
-    return parsed?.version === 2 ? parsed : null;
+    if (parsed?.version !== 2) return null;
+    // Drafts saved before quizzes existed: add the default quiz settings instead of discarding the draft.
+    return { ...parsed, quiz: parsed.quiz ?? { placement: 'top', points: {} } };
   } catch {
     return null;
   }

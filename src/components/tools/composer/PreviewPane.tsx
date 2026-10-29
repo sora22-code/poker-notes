@@ -2,6 +2,8 @@ import type { ReactNode } from 'react';
 import PokerTable from '../../poker/PokerTable';
 import ActionLine from '../../poker/ActionLine';
 import HandRangeChart from '../../poker/HandRangeChart';
+import HandReplayer from '../../poker/HandReplayer';
+import { buildQuizFromDraft } from '../../../lib/quiz/fromDraft';
 import { panelStyle } from '../hand/styles';
 import { isSectionVisible } from '../../../lib/composer/draft';
 import { parseHighlight } from '../../../lib/composer/rangeBlock';
@@ -73,6 +75,10 @@ function PreviewItem({ item, draft, result }: { item: SectionItem; draft: Articl
 }
 
 export default function PreviewPane({ draft, result }: { draft: ArticleDraft; result: HandResult }) {
+  const quiz = draft.quiz.placement === 'none' ? null : buildQuizFromDraft(draft, result);
+  // Preview answers must not land in the author's own review list.
+  const replayer = quiz ? <HandReplayer key={JSON.stringify(quiz)} quiz={quiz} recordProgress={false} /> : null;
+
   return (
     <div className="rounded-xl border p-5 sm:p-6 space-y-6" style={{ ...panelStyle, color: 'var(--color-text)' }}>
       <header>
@@ -96,6 +102,7 @@ export default function PreviewPane({ draft, result }: { draft: ArticleDraft; re
             <li key={line}>{line}</li>
           ))}
         </ul>
+        {draft.quiz.placement === 'top' && replayer}
       </section>
 
       {draft.sections
@@ -112,6 +119,15 @@ export default function PreviewPane({ draft, result }: { draft: ArticleDraft; re
             </div>
           </section>
         ))}
+
+      {draft.quiz.placement === 'bottom' && replayer && (
+        <section>
+          <h2 className="font-bold text-base mb-3 pb-1 border-b" style={{ borderColor: 'var(--color-border)' }}>
+            クイズで振り返る
+          </h2>
+          {replayer}
+        </section>
+      )}
 
       <p className="text-[11px]" style={{ color: 'var(--color-text-muted)' }}>
         ※ 専門用語のホバー解説は公開後の記事ページで自動的に付きます。

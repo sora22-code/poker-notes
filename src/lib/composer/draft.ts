@@ -62,6 +62,7 @@ export function createInitialDraft(): ArticleDraft {
     },
     hand: createEmptyHand(),
     villainImage: '',
+    quiz: { placement: 'top', points: {} },
     sections: SECTION_DEFS.map(
       (def): Section => ({
         id: def.id,

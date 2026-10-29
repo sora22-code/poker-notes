@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import FrontmatterForm from './FrontmatterForm';
 import StreetSection from './StreetSection';
 import PreviewPane from './PreviewPane';
+import QuizPanel from './QuizPanel';
 import HandSetupForm from '../hand/HandSetupForm';
 import {
   errorBoxStyle,
@@ -104,6 +105,13 @@ export default function ArticleComposer() {
             onHandChange={updateHand}
           />
         ))}
+
+        <QuizPanel
+          value={draft.quiz}
+          onChange={(quiz) => setDraft((d) => ({ ...d, quiz }))}
+          input={draft.hand}
+          result={result}
+        />
 
         <FrontmatterForm
           value={draft.frontmatter}
